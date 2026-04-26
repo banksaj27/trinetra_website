@@ -507,6 +507,8 @@
   
         gl.bindFramebuffer(gl.FRAMEBUFFER,null);gl.viewport(0,0,Math.floor(W*dpr),Math.floor(H*dpr));
         gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT);gl.disable(gl.DEPTH_TEST);
+        if(overlayCanvas&&overlayCanvas.width>0){uploadTex(particleTex,overlayCanvas);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
+          gl.useProgram(progTex);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,particleTex);gl.uniform1i(texUT,0);drawFSQ(progTex,texAP);}
         uploadTex(gridTex,gridCanvas);gl.enable(gl.BLEND);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
         gl.useProgram(progTex);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,gridTex);gl.uniform1i(texUT,0);drawFSQ(progTex,texAP);
         gl.useProgram(progMain);gl.uniform2f(mainUR,W,H);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);flushT(sceneBuf,sceneN,vbo,vaoMain);
@@ -514,8 +516,6 @@
         if(screenBlendN>0){gl.useProgram(progMain);gl.uniform2f(mainUR,W,H);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_COLOR);
           flushT(screenBlendBuf,screenBlendN,screenVbo,vaoScreen);gl.blendFunc(gl.SRC_ALPHA,gl.ONE_MINUS_SRC_ALPHA);}
         renderBloom();
-        if(overlayCanvas&&overlayCanvas.width>0){uploadTex(particleTex,overlayCanvas);gl.blendFunc(gl.ONE,gl.ONE_MINUS_SRC_ALPHA);
-          gl.useProgram(progTex);gl.activeTexture(gl.TEXTURE0);gl.bindTexture(gl.TEXTURE_2D,particleTex);gl.uniform1i(texUT,0);drawFSQ(progTex,texAP);}
         frameId=raf(frame);}
   
       function resize(w,h,nd){W=w;H=h;dpr=Math.min(nd||1,2);canvas.width=Math.floor(W*dpr);canvas.height=Math.floor(H*dpr);
