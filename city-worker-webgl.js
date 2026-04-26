@@ -437,9 +437,9 @@
         if(projectInto(ax,ay,az,arc.aP)){o=pRG(sceneBuf,o,arc.aP.x,arc.aP.y,17,1,.38,.16,.32*al);
           o=pRG(sceneBuf,o,arc.aP.x,arc.aP.y,5,1,.72,.42,.6*al);}
         var t=tT,om=1-t,px=om*om*ax+2*om*t*mx+t*t*bx,py=om*om*ay+2*om*t*my+t*t*by2,pz=om*om*az+2*om*t*mz+t*t*bz;
-        if(projectInto(px,py,pz,arc.pP)&&t<1){o=pRG(sceneBuf,o,arc.pP.x,arc.pP.y,arc.dotRadius*5.6,1,.36,.14,.66*al);
-          o=pRG(sceneBuf,o,arc.pP.x,arc.pP.y,arc.dotRadius*1.92,1,.86,.58,.88*al);
-          o=pRG(sceneBuf,o,arc.pP.x,arc.pP.y,Math.max(1.9,arc.dotRadius*.44),1,.96,.9,.98*al);}
+        if(projectInto(px,py,pz,arc.pP)&&t<1){o=pRG(sceneBuf,o,arc.pP.x,arc.pP.y,arc.dotRadius*6.5,1,.36,.14,.66*al);
+          o=pRG(sceneBuf,o,arc.pP.x,arc.pP.y,arc.dotRadius*2.35,1,.86,.58,.88*al);
+          o=pRG(sceneBuf,o,arc.pP.x,arc.pP.y,Math.max(2.45,arc.dotRadius*.56),1,.96,.9,.98*al);}
         if(arc.bloomAt&&projectInto(bx,by2,bz,arc.bP)){var bt=(now-arc.bloomAt)/680;if(bt<1){var bf=Math.pow(1-bt,1.7),ps=1+bt*1.45;
           o=pRG(sceneBuf,o,arc.bP.x,arc.bP.y,18*ps,1,.34,.12,.4*bf*al);
           o=pRG(sceneBuf,o,arc.bP.x,arc.bP.y,7*ps,1,.72,.4,.55*bf*al);
