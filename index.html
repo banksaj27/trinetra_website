@@ -1015,6 +1015,39 @@
       color: rgba(245, 245, 245, 0.68);
     }
 
+    .damage-cell {
+      position: absolute;
+      width: clamp(28px, 4vw, 48px);
+      height: clamp(20px, 2.8vw, 34px);
+      border: 1px solid currentColor;
+      opacity: 0;
+      animation: classifyDamage 5.4s var(--ease-out) infinite;
+      z-index: 1;
+    }
+
+    .damage-cell.minor-damage {
+      color: #eab308;
+      background: rgba(234, 179, 8, 0.18);
+    }
+
+    .damage-cell::after {
+      content: attr(data-severity);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 4px);
+      padding: 0.2rem 0.28rem;
+      background: rgba(5, 6, 8, 0.78);
+      font-family: var(--font-mono);
+      font-size: 0.52rem;
+      color: currentColor;
+      white-space: nowrap;
+    }
+
+    .demo-loop:has(.satellite-frame) .damage-cell {
+      left: 46%;
+      top: 40%;
+    }
+
     .graph-canvas {
       position: absolute;
       inset: 0;
@@ -1436,6 +1469,12 @@
       color: var(--muted);
     }
 
+    @keyframes classifyDamage {
+      0%, 16% { opacity: 0; transform: translateY(8px) scale(0.96); }
+      28%, 82% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0.35; transform: translateY(0) scale(1); }
+    }
+
     @keyframes edgePulse {
       0%, 22% { opacity: 0.12; box-shadow: none; }
       36%, 70% { opacity: 0.9; box-shadow: 0 0 18px rgba(217, 79, 43, 0.38); }
@@ -1774,8 +1813,9 @@
           <h2 class="section-title" id="eye-damage-title">See What Broke, The Moment Imagery Arrives</h2>
           <p class="section-copy">TriNetra ingests satellite and aerial imagery from Maxar, Planet Labs, and NOAA the moment it&rsquo;s captured. Computer vision automatically segments every structure in the affected area and classifies it: destroyed, major damage, minor damage, or affected. No manual review. No queue.</p>
         </div>
-        <div class="demo-loop" aria-label="San Jose aerial imagery">
+        <div class="demo-loop" aria-label="San Jose aerial imagery with sample damage classification">
           <div class="satellite-frame" data-source="san_jose.png" aria-hidden="true"></div>
+          <span class="damage-cell minor-damage" data-severity="minor-damage" aria-hidden="true"></span>
         </div>
       </div>
     </section>
