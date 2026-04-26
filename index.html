@@ -1590,26 +1590,24 @@
 
     .modal-card {
       width: min(100%, 56rem);
+      position: relative;
       background: var(--bg-deep);
       border: 1px solid var(--accent);
       box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7);
     }
 
-    .modal-head {
-      display: flex;
-      align-items: center;
-      justify-content: flex-end;
-      gap: 1rem;
-      padding: 1rem 1.25rem;
-      border-bottom: 1px solid var(--rule);
-    }
-
     .modal-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 0.75rem;
+      z-index: 2;
       min-width: 44px;
       min-height: 44px;
       border: 1px solid var(--rule);
+      background: rgba(6, 6, 6, 0.72);
       color: var(--muted);
       font-size: 1.3rem;
+      backdrop-filter: blur(8px);
       transition: color 160ms var(--ease-out), border-color 160ms var(--ease-out);
     }
 
@@ -2049,9 +2047,7 @@
 
   <div class="modal" id="demoModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Product demonstration video">
     <div class="modal-card">
-      <div class="modal-head">
-        <button class="modal-close" type="button" data-close-demo aria-label="Close demo video">&times;</button>
-      </div>
+      <button class="modal-close" type="button" data-close-demo aria-label="Close demo video">&times;</button>
       <div class="modal-video">
         <!-- Video: default file is demo.mp4 alongside index.html; change src on the source element if you use another path or filename. -->
         <video id="demoModalVideo" class="modal-demo-video" controls playsinline preload="metadata" aria-label="TriNetra product demonstration">
