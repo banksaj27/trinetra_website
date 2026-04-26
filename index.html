@@ -1,0 +1,2400 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="description" content="TriNetra AI combines satellite imagery analysis, infrastructure dependency mapping, and real-time cascade modeling to help emergency teams make faster decisions in the critical first 72 hours.">
+  <title>TriNetra AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      color-scheme: dark;
+
+      --bg: #090909;
+      --bg-deep: #050505;
+      --bg-card: #080808;
+      --card: #0d0d0d;
+      --card-2: #111111;
+
+      --border: #202020;
+      --border-soft: #171717;
+      --rule: #1a1a1a;
+
+      --text: #f5f5f5;
+      --text-2: #d6d6d6;
+      --muted: #8f8f8f;
+      --faint: #4a4a4a;
+
+      --accent: #D94F2B;
+      --accent-hot: #D94F2B;
+      --accent-warm: #D94F2B;
+      --accent-glow: rgba(217, 79, 43, 0.36);
+      --bloom: #D94F2B;
+
+      --font-display: 'Rajdhani', sans-serif;
+      --font-mono: 'Fira Code', monospace;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-quart: cubic-bezier(0.25, 1, 0.5, 1);
+
+      --max: 1480px;
+      --gutter: clamp(1.25rem, 3vw, 2.5rem);
+    }
+
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-padding-top: 56px;
+      background: var(--bg-deep);
+    }
+
+    body {
+      min-height: 100vh;
+      background: var(--bg-deep);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 15px;
+      line-height: 1.65;
+      letter-spacing: 0;
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      font-feature-settings: "kern", "ss01";
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    button {
+      cursor: pointer;
+      font: inherit;
+      color: inherit;
+      background: none;
+      border: none;
+    }
+
+    img,
+    svg {
+      display: block;
+    }
+
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    .visually-hidden {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .skip-link {
+      position: fixed;
+      top: 0.75rem;
+      left: 0.75rem;
+      z-index: 200;
+      padding: 0.6rem 0.9rem;
+      background: var(--card);
+      border: 1px solid var(--accent);
+      color: var(--text);
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      transform: translateY(-150%);
+      transition: transform 180ms var(--ease-out);
+    }
+
+    .skip-link:focus {
+      transform: translateY(0);
+    }
+
+    .topbar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      z-index: 1000;
+      height: 56px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 2rem;
+      padding: 0 40px;
+      background: rgba(6, 8, 9, 0.86);
+      border-bottom: 1px solid rgba(217, 79, 43, 0.18);
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.55rem;
+      font-family: var(--font-display);
+      font-size: 22px;
+      letter-spacing: 0.02em;
+      line-height: 1;
+      color: var(--text);
+      min-height: 44px;
+      align-self: center;
+    }
+
+    .brand-mark {
+      display: inline-block;
+      width: auto;
+      height: auto;
+      margin-left: 8px;
+      transform: translateY(2px);
+      background: none;
+      color: var(--accent);
+      font-size: 18px;
+      line-height: 1;
+      letter-spacing: 0;
+      text-shadow: 0 0 14px var(--accent-glow);
+    }
+
+    .nav {
+      position: relative;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: 28px;
+      margin-left: auto;
+      --nav-indicator-left: 0px;
+      --nav-indicator-width: 0px;
+      --nav-indicator-opacity: 0;
+    }
+
+    .nav::after {
+      content: "";
+      position: absolute;
+      left: 0;
+      bottom: 0.55rem;
+      width: var(--nav-indicator-width);
+      height: 2px;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+      opacity: var(--nav-indicator-opacity);
+      transform: translateX(var(--nav-indicator-left));
+      transition: transform 260ms var(--ease-out), width 260ms var(--ease-out), opacity 160ms var(--ease-out);
+      pointer-events: none;
+    }
+
+    .nav a {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      min-height: 44px;
+      padding: 0 0.1rem;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      color: var(--muted);
+      transition: color 160ms var(--ease-out);
+    }
+
+    .nav a:hover,
+    .nav a:focus-visible {
+      color: var(--text);
+    }
+
+    .nav a[aria-current="page"] {
+      color: var(--text);
+    }
+
+    .nav-cta {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 38px;
+      padding: 8px 16px;
+      border: 1px solid #D94F2B;
+      background: transparent;
+      color: #D94F2B;
+      font-family: var(--font-display);
+      font-size: 13px;
+      font-weight: 500;
+      letter-spacing: 0.02em;
+      text-transform: none;
+      transition: background 200ms var(--ease-out), color 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+    }
+
+    .nav-cta:hover,
+    .nav-cta:focus-visible {
+      background: var(--accent);
+      color: #ffffff;
+      box-shadow: 0 0 24px var(--accent-glow);
+      outline: none;
+    }
+
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      overflow: hidden;
+      isolation: isolate;
+      background: var(--bg-deep);
+      scroll-margin-top: 56px;
+    }
+
+    .city-canvas {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      will-change: transform;
+      pointer-events: none;
+    }
+
+    .page-content {
+      position: relative;
+      z-index: 1;
+      pointer-events: auto;
+    }
+
+    .city-fallback {
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      display: none;
+      background:
+        radial-gradient(ellipse 55% 30% at 70% 78%, rgba(217, 79, 43, 0.24), transparent 70%),
+        radial-gradient(ellipse 80% 55% at 75% 85%, rgba(24, 24, 24, 0.62), transparent 72%),
+        radial-gradient(ellipse 100% 70% at 50% 110%, rgba(18, 18, 18, 0.32), transparent 70%),
+        linear-gradient(180deg, var(--bg-deep) 25%, #0c0c0c 100%);
+    }
+
+    .left-mask {
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 55%;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(to right, rgba(5, 6, 8, 0.92) 0%, rgba(5, 6, 8, 0.75) 60%, transparent 100%);
+    }
+
+    .vignette {
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      pointer-events: none;
+      background:
+        radial-gradient(ellipse 110% 90% at 60% 55%, transparent 35%, rgba(0, 0, 0, 0.55) 90%, rgba(0, 0, 0, 0.7) 100%),
+        linear-gradient(180deg, rgba(5, 7, 9, 0.6) 0%, transparent 18%);
+    }
+
+    .ambient-glow {
+      position: fixed;
+      inset: 0;
+      z-index: 1;
+      pointer-events: none;
+      background: linear-gradient(180deg, transparent 52%, rgba(217, 79, 43, 0.2) 80%, rgba(217, 79, 43, 0.32) 100%);
+      mix-blend-mode: screen;
+    }
+
+    .scanlines {
+      position: absolute;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background: repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.02) 0 1px, transparent 1px 3px);
+      mix-blend-mode: overlay;
+      opacity: 0.7;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 5;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 56px var(--gutter) 0;
+      display: grid;
+      grid-template-columns: minmax(0, 0.95fr) minmax(0, 1.05fr);
+      gap: 2.5rem;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .hero-text {
+      max-width: 40rem;
+    }
+
+    .eyebrow {
+      font-family: var(--font-display);
+      font-size: 0.86rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: none;
+      color: #D94F2B;
+      margin-bottom: 1.2rem;
+      animation: riseIn 700ms var(--ease-out) both;
+    }
+
+    h1 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 4.5vw, 64px);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: 0.01em;
+      color: #ffffff;
+      max-width: 580px;
+      margin-bottom: 1.55rem;
+      text-wrap: balance;
+    }
+
+    h1 .line {
+      display: block;
+      animation: riseIn 800ms var(--ease-out) both;
+    }
+
+    h1 .line-emphasis {
+      color: #D94F2B;
+    }
+
+    h1 .line:nth-child(1) { animation-delay: 80ms; }
+    h1 .line:nth-child(2) { animation-delay: 180ms; }
+    h1 .line:nth-child(3) { animation-delay: 280ms; }
+
+    .hero-sub {
+      max-width: 34rem;
+      color: var(--text-2);
+      font-family: var(--font-mono);
+      font-size: 1.02rem;
+      line-height: 1.72;
+      letter-spacing: 0;
+      margin-bottom: 2.1rem;
+      animation: riseIn 800ms var(--ease-out) 360ms both;
+    }
+
+    .cta-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-bottom: 1.75rem;
+      animation: riseIn 800ms var(--ease-out) 440ms both;
+    }
+
+    .hero-text .cta-row {
+      margin-bottom: 0;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 46px;
+      padding: 0.92rem 1.35rem;
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      text-transform: none;
+      border-radius: 0;
+      transition: background 200ms var(--ease-out), color 200ms var(--ease-out), border-color 200ms var(--ease-out), transform 200ms var(--ease-out), box-shadow 200ms var(--ease-out);
+      will-change: transform;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #ffffff;
+      border: 1px solid var(--accent);
+      box-shadow: 0 0 0 rgba(217, 79, 43, 0);
+    }
+
+    .btn-primary:hover,
+    .btn-primary:focus-visible {
+      background: var(--accent-hot);
+      border-color: var(--accent-hot);
+      transform: translateY(-1px);
+      box-shadow: 0 8px 24px rgba(217, 79, 43, 0.32);
+      outline: none;
+    }
+
+    .btn-ghost {
+      background: transparent;
+      border: 1px solid #D94F2B;
+      color: #D94F2B;
+    }
+
+    .btn-ghost:hover,
+    .btn-ghost:focus-visible {
+      background: rgba(217, 79, 43, 0.12);
+      border-color: var(--accent);
+      color: var(--text);
+      transform: translateY(-1px);
+      outline: none;
+    }
+
+    .stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      animation: riseIn 800ms var(--ease-out) 520ms both;
+    }
+
+    .stat {
+      display: inline-flex;
+      align-items: flex-start;
+      gap: 0.7rem;
+      padding: 0.7rem 1.05rem 0.7rem 0.85rem;
+      border: 1px solid #1f2229;
+      background: rgba(8, 10, 14, 0.45);
+      transition: border-color 200ms var(--ease-out), background 200ms var(--ease-out);
+    }
+
+    .stat:hover {
+      border-color: #2a2f3a;
+      background: rgba(13, 16, 22, 0.7);
+    }
+
+    .stat-mark {
+      display: inline-block;
+      width: 0.5rem;
+      height: 0.5rem;
+      margin-top: 0.55rem;
+      transform: rotate(45deg);
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .stat-body {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .stat-val {
+      font-family: var(--font-mono);
+      font-weight: 500;
+      color: var(--text);
+      font-size: 1rem;
+      line-height: 1.05;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.01em;
+    }
+
+    .stat-lab {
+      margin-top: 0.25rem;
+      font-family: var(--font-mono);
+      font-size: 0.66rem;
+      color: var(--muted);
+      line-height: 1.35;
+      letter-spacing: 0.06em;
+    }
+
+    .scroll-cue {
+      position: absolute;
+      left: 50%;
+      bottom: 1rem;
+      z-index: 5;
+      transform: translateX(-50%);
+      width: 1px;
+      height: 2.4rem;
+    }
+
+    .scroll-cue::before,
+    .scroll-cue::after {
+      content: "";
+      position: absolute;
+      pointer-events: none;
+    }
+
+    .scroll-cue::before {
+      inset: 0;
+      background: linear-gradient(180deg, transparent, var(--accent));
+      opacity: 0.6;
+      animation: cuePulse 2.4s var(--ease-out) infinite;
+    }
+
+    .scroll-cue::after {
+      left: 50%;
+      bottom: -0.3rem;
+      width: 0.4rem;
+      height: 0.4rem;
+      transform: translateX(-50%) rotate(45deg);
+      border-right: 1px solid var(--accent);
+      border-bottom: 1px solid var(--accent);
+      animation: cuePulse 2.4s var(--ease-out) infinite;
+    }
+
+    .features {
+      position: relative;
+      padding: clamp(2.5rem, 5vw, 4rem) var(--gutter);
+      min-height: clamp(280px, 38vh, 360px);
+      display: flex;
+      align-items: center;
+      background: #080a0d;
+      border-top: 1px solid var(--rule);
+    }
+
+    .features-grid {
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: clamp(1rem, 2.5vw, 2.75rem);
+    }
+
+    .feature {
+      position: relative;
+      display: grid;
+      align-content: start;
+      gap: 0.95rem;
+      padding: clamp(1.1rem, 2vw, 1.6rem) 0;
+      background: transparent;
+      border: 0;
+      border-top: 1px solid rgba(217, 79, 43, 0.24);
+    }
+
+    .feature p {
+      max-width: 24ch;
+      font-family: var(--font-display);
+      font-size: clamp(1.65rem, 2.5vw, 2.55rem);
+      font-weight: 700;
+      line-height: 0.98;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .features.reveal-section .feature {
+      opacity: 0;
+      transform: translateY(0.85rem);
+      transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+    }
+
+    .features.reveal-section .feature:nth-child(2) { transition-delay: 100ms; }
+    .features.reveal-section .feature:nth-child(3) { transition-delay: 200ms; }
+
+    .features.reveal-section.is-visible .feature {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .section {
+      position: relative;
+      padding: clamp(5rem, 9vw, 8rem) var(--gutter);
+      background: var(--bg-deep);
+      border-top: 1px solid var(--rule);
+      overflow: hidden;
+    }
+
+    .section-inner {
+      width: min(100%, var(--max));
+      margin: 0 auto;
+    }
+
+    .section-kicker {
+      margin-bottom: 0.9rem;
+      font-family: var(--font-display);
+      font-size: 0.86rem;
+      font-weight: 700;
+      letter-spacing: 0.14em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .section-title {
+      max-width: 760px;
+      font-family: var(--font-display);
+      font-size: clamp(2.2rem, 5vw, 4.4rem);
+      font-weight: 700;
+      line-height: 0.98;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .section-copy {
+      max-width: 62ch;
+      margin-top: 1.25rem;
+      font-family: var(--font-mono);
+      font-size: clamp(0.92rem, 1.1vw, 1.04rem);
+      line-height: 1.8;
+      color: var(--text-2);
+    }
+
+    .problem-section {
+      display: flex;
+      align-items: center;
+      padding-top: clamp(4rem, 6vw, 5.5rem);
+      padding-bottom: clamp(4rem, 6vw, 5.5rem);
+      background:
+        radial-gradient(ellipse 48% 42% at 82% 48%, rgba(217, 79, 43, 0.07), transparent 70%),
+        linear-gradient(180deg, #050608 0%, #06080a 48%, #050608 100%);
+    }
+
+    .problem-section::before {
+      content: "";
+      position: absolute;
+      inset: 12% var(--gutter);
+      pointer-events: none;
+      opacity: 0.28;
+      background:
+        linear-gradient(90deg, transparent 0 49%, rgba(217, 79, 43, 0.18) 49% 49.15%, transparent 49.15% 100%),
+        repeating-linear-gradient(0deg, transparent 0 72px, rgba(255, 255, 255, 0.035) 72px 73px);
+      mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+    }
+
+    .problem-section .section-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.62rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.16em;
+    }
+
+    .problem-kicker-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--accent);
+      filter: drop-shadow(0 0 10px var(--accent-glow));
+      transform: translateY(-1px);
+    }
+
+    .problem-section .section-kicker,
+    .problem-section .pull-quote,
+    .problem-section .story-note,
+    .problem-section .problem-stats {
+      opacity: 0;
+      transform: translateY(0.85rem);
+      transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+    }
+
+    .problem-section .pull-quote { transition-delay: 80ms; }
+    .problem-section .story-note { transition-delay: 160ms; }
+    .problem-section .story-note + .story-note { transition-delay: 240ms; }
+    .problem-section .problem-stats { transition-delay: 260ms; }
+
+    .problem-section.is-visible .section-kicker,
+    .problem-section.is-visible .pull-quote,
+    .problem-section.is-visible .story-note,
+    .problem-section.is-visible .problem-stats {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .problem-grid,
+    .eye-section {
+      display: grid;
+      grid-template-columns: minmax(0, 48fr) minmax(0, 52fr);
+      gap: clamp(3rem, 6vw, 6rem);
+      align-items: center;
+    }
+
+    .pull-quote {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 4.5vw, 64px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.01em;
+      color: var(--text);
+      text-wrap: balance;
+    }
+
+    .story-note {
+      max-width: 48ch;
+      margin-top: 1.35rem;
+      font-family: var(--font-mono);
+      font-size: 0.94rem;
+      line-height: 1.75;
+      color: #a3a3a3;
+    }
+
+    .problem-section .story-note:last-of-type {
+      max-width: 44ch;
+      color: var(--text-2);
+    }
+
+    .problem-stats {
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+      position: relative;
+      padding: 0;
+    }
+
+    .stat-item {
+      position: relative;
+      padding-bottom: 28px;
+      border-bottom: 1px solid #1a1a1a;
+    }
+
+    .stat-item:last-child {
+      padding-bottom: 0;
+      border-bottom: 0;
+    }
+
+    .stat-number {
+      display: block;
+      font-family: var(--font-display);
+      font-size: clamp(44px, 5.2vw, 76px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: -0.01em;
+      color: var(--accent);
+      font-variant-numeric: tabular-nums;
+      text-shadow: 0 0 26px rgba(217, 79, 43, 0.12);
+    }
+
+    .stat-label {
+      display: block;
+      margin-top: 6px;
+      font-family: var(--font-mono);
+      font-size: 15px;
+      font-weight: 400;
+      color: #ffffff;
+      text-transform: lowercase;
+    }
+
+    .three-eyes-heading {
+      position: relative;
+      z-index: 6;
+      padding: clamp(3.8rem, 7vw, 6.5rem) var(--gutter);
+      border-top: 1px solid var(--rule);
+      border-bottom: 1px solid var(--rule);
+      background:
+        radial-gradient(ellipse 42% 70% at 50% 50%, rgba(217, 79, 43, 0.09), transparent 70%),
+        #080a0d;
+      text-align: center;
+      box-shadow: 0 18px 60px rgba(0, 0, 0, 0.4);
+      scroll-margin-top: 56px;
+    }
+
+    .three-eyes-mark {
+      display: flex;
+      justify-content: center;
+      gap: clamp(1.2rem, 3vw, 2.5rem);
+      margin-bottom: 1.4rem;
+      font-size: clamp(3.8rem, 10vw, 8.5rem);
+      line-height: 0.8;
+      color: var(--accent);
+      letter-spacing: -0.12em;
+      text-shadow: 0 0 34px rgba(217, 79, 43, 0.28);
+    }
+
+    .three-eyes-title-row {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.75rem;
+    }
+
+    .three-eyes-heading h2 {
+      font-family: var(--font-display);
+      font-size: clamp(36px, 4.5vw, 64px);
+      font-weight: 700;
+      line-height: 1;
+      letter-spacing: 0.01em;
+      color: var(--text);
+    }
+
+    .three-eyes-heading p {
+      max-width: 58ch;
+      margin: 1rem auto 0;
+      font-family: var(--font-mono);
+      color: var(--text-2);
+    }
+
+    .three-eyes-heading .three-eyes-mark,
+    .three-eyes-heading .three-eyes-title-row,
+    .three-eyes-heading p {
+      opacity: 0;
+      transform: translateY(0.85rem);
+      transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+    }
+
+    .three-eyes-heading .three-eyes-title-row { transition-delay: 80ms; }
+    .three-eyes-heading p { transition-delay: 160ms; }
+
+    .three-eyes-heading.is-visible .three-eyes-mark,
+    .three-eyes-heading.is-visible .three-eyes-title-row,
+    .three-eyes-heading.is-visible p {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .eye-story,
+    .eye-priority-section {
+      background:
+        radial-gradient(ellipse 46% 62% at 82% 50%, rgba(217, 79, 43, 0.055), transparent 70%),
+        linear-gradient(180deg, #080a0d 0%, #07090b 48%, #080a0d 100%);
+    }
+
+    .eye-story + .eye-story {
+      background:
+        radial-gradient(ellipse 46% 62% at 82% 50%, rgba(217, 79, 43, 0.05), transparent 70%),
+        linear-gradient(180deg, #050608 0%, #06080a 48%, #050608 100%);
+    }
+
+    .eye-priority-section {
+      background:
+        radial-gradient(ellipse 55% 45% at 50% 46%, rgba(217, 79, 43, 0.07), transparent 72%),
+        linear-gradient(180deg, #080a0d 0%, #07090b 52%, #080a0d 100%);
+    }
+
+    .eye-story::before,
+    .eye-priority-section::before {
+      content: "";
+      position: absolute;
+      inset: 12% var(--gutter);
+      pointer-events: none;
+      opacity: 0.18;
+      background:
+        linear-gradient(90deg, transparent 0 49%, rgba(217, 79, 43, 0.16) 49% 49.15%, transparent 49.15% 100%),
+        repeating-linear-gradient(0deg, transparent 0 72px, rgba(255, 255, 255, 0.03) 72px 73px);
+      mask-image: linear-gradient(90deg, transparent, #000 20%, #000 80%, transparent);
+    }
+
+    .eye-story .eye-section {
+      grid-template-columns: minmax(0, 48fr) minmax(0, 52fr);
+      gap: clamp(3rem, 6vw, 6rem);
+    }
+
+    .eye-story .section-title,
+    .eye-priority-section .section-title {
+      font-size: clamp(36px, 4.5vw, 64px);
+      line-height: 1;
+    }
+
+    .eye-story .section-kicker,
+    .eye-priority-section .section-kicker {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.62rem;
+      font-size: 0.95rem;
+      letter-spacing: 0.16em;
+    }
+
+    .eye-kicker-icon {
+      width: 1.25rem;
+      height: 1.25rem;
+      color: var(--accent);
+      filter: drop-shadow(0 0 10px var(--accent-glow));
+      flex-shrink: 0;
+      transform: translateY(-2px);
+    }
+
+    .eye-kicker-icon-graph {
+      transform: translateY(-1px);
+    }
+
+    .eye-story .demo-loop,
+    .eye-priority-section .demo-loop {
+      border-color: rgba(217, 79, 43, 0.24);
+      background: #060606;
+      box-shadow:
+        inset 0 0 0 1px rgba(255, 255, 255, 0.025),
+        0 22px 70px rgba(0, 0, 0, 0.34);
+    }
+
+    .reveal-section .section-kicker,
+    .reveal-section .section-title,
+    .reveal-section .section-copy,
+    .reveal-section .demo-loop,
+    .reveal-section .logo-grid,
+    .reveal-section .trust-grid,
+    .reveal-section .cta-row,
+    .reveal-section .pilot-note {
+      opacity: 0;
+      transform: translateY(0.85rem);
+      transition: opacity 700ms var(--ease-out), transform 700ms var(--ease-out);
+    }
+
+    .reveal-section .section-title { transition-delay: 80ms; }
+    .reveal-section .section-copy { transition-delay: 160ms; }
+    .reveal-section .logo-grid,
+    .reveal-section .trust-grid,
+    .reveal-section .cta-row { transition-delay: 240ms; }
+    .reveal-section .demo-loop,
+    .reveal-section .pilot-note { transition-delay: 300ms; }
+
+    .reveal-section.is-visible .section-kicker,
+    .reveal-section.is-visible .section-title,
+    .reveal-section.is-visible .section-copy,
+    .reveal-section.is-visible .demo-loop,
+    .reveal-section.is-visible .logo-grid,
+    .reveal-section.is-visible .trust-grid,
+    .reveal-section.is-visible .cta-row,
+    .reveal-section.is-visible .pilot-note {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .eye-section.reverse {
+      grid-template-columns: minmax(0, 1.08fr) minmax(0, 0.92fr);
+    }
+
+    .eye-section.reverse .eye-copy {
+      order: 2;
+    }
+
+    .eye-copy {
+      position: relative;
+      z-index: 1;
+    }
+
+    .demo-loop {
+      position: relative;
+      min-height: clamp(360px, 42vw, 520px);
+      border: 1px solid var(--border);
+      background: #060606;
+      overflow: hidden;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.02);
+    }
+
+    .demo-loop::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background:
+        linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.035) 50%, transparent 100%),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 4px);
+      mix-blend-mode: screen;
+      opacity: 0.55;
+    }
+
+    .demo-label {
+      position: absolute;
+      left: 1rem;
+      top: 1rem;
+      z-index: 2;
+      padding: 0.4rem 0.55rem;
+      border: 1px solid rgba(217, 79, 43, 0.35);
+      background: rgba(5, 5, 5, 0.86);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      color: var(--muted);
+    }
+
+    .satellite-frame {
+      position: absolute;
+      inset: 0;
+      background:
+        linear-gradient(180deg, rgba(5, 6, 8, 0.02), rgba(5, 6, 8, 0.32)),
+        url("https://titiler.xyz/cog/preview.png?url=https%3A%2F%2Fmaxar-opendata.s3.amazonaws.com%2Fevents%2FHurricane-Ian-9-26-2022%2Fard%2F17%2F031313331010%2F2022-10-03%2F10300100DCA2CF00-visual.tif&rescale=0%2C255"),
+        url("https://stormscdn.ngs.noaa.gov/20220929a-rgb/12/1114/1732"),
+        #0d0d0d;
+      background-size: cover;
+      background-position: center;
+      filter: saturate(0.78) contrast(1.14) brightness(0.68);
+      transform: scale(1.1) rotate(-1.1deg);
+    }
+
+    .satellite-frame::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background:
+        repeating-linear-gradient(28deg, rgba(245, 245, 245, 0.08) 0 1px, transparent 1px 32px),
+        repeating-linear-gradient(118deg, rgba(245, 245, 245, 0.055) 0 1px, transparent 1px 40px);
+      mix-blend-mode: screen;
+      opacity: 0.28;
+    }
+
+    .satellite-frame::after {
+      content: "Maxar Open Data, Hurricane Ian ARD tile";
+      position: absolute;
+      right: 1rem;
+      bottom: 1rem;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid rgba(255, 255, 255, 0.14);
+      background: rgba(5, 6, 8, 0.74);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: rgba(245, 245, 245, 0.68);
+    }
+
+    .damage-cell {
+      position: absolute;
+      width: clamp(34px, 5vw, 58px);
+      height: clamp(22px, 3.2vw, 38px);
+      border: 1px solid currentColor;
+      background: rgba(217, 79, 43, 0.12);
+      color: var(--accent);
+      opacity: 0;
+      animation: classifyDamage 5.4s var(--ease-out) infinite;
+    }
+
+    .damage-cell.minor {
+      color: #d8a63f;
+      background: rgba(216, 166, 63, 0.12);
+    }
+
+    .damage-cell.major {
+      color: #D94F2B;
+      background: rgba(217, 79, 43, 0.18);
+    }
+
+    .damage-cell.destroyed {
+      color: #f5f5f5;
+      background: rgba(217, 79, 43, 0.42);
+    }
+
+    .damage-cell::after {
+      content: attr(data-severity);
+      position: absolute;
+      left: 0;
+      bottom: calc(100% + 4px);
+      padding: 0.2rem 0.28rem;
+      background: rgba(5, 6, 8, 0.78);
+      font-family: var(--font-mono);
+      font-size: 0.52rem;
+      color: currentColor;
+      white-space: nowrap;
+    }
+
+    .damage-cell:nth-child(3) { left: 16%; top: 23%; animation-delay: 0.1s; }
+    .damage-cell:nth-child(4) { left: 30%; top: 42%; animation-delay: 0.45s; }
+    .damage-cell:nth-child(5) { left: 48%; top: 29%; animation-delay: 0.8s; }
+    .damage-cell:nth-child(6) { left: 63%; top: 52%; animation-delay: 1.1s; }
+    .damage-cell:nth-child(7) { left: 73%; top: 34%; animation-delay: 1.35s; }
+    .damage-cell:nth-child(8) { left: 36%; top: 65%; animation-delay: 1.7s; }
+    .damage-cell:nth-child(9) { left: 56%; top: 72%; animation-delay: 2s; }
+
+    .graph-canvas {
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 32% 26% at 18% 38%, rgba(217, 79, 43, 0.16), transparent 72%),
+        radial-gradient(ellipse 44% 34% at 72% 55%, rgba(245, 245, 245, 0.035), transparent 70%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+        #06080a;
+      background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px, auto;
+    }
+
+    .graph-canvas::before,
+    .graph-canvas::after {
+      content: "";
+      position: absolute;
+      inset: 12% 8%;
+      border: 1px solid rgba(255, 255, 255, 0.035);
+      transform: skewY(-7deg);
+      opacity: 0.55;
+    }
+
+    .graph-canvas::after {
+      inset: 26% 17% 18% 13%;
+      border-color: rgba(217, 79, 43, 0.1);
+      opacity: 0.48;
+    }
+
+    .graph-status {
+      position: absolute;
+      right: 1rem;
+      top: 1rem;
+      z-index: 2;
+      display: grid;
+      gap: 0.35rem;
+      padding: 0.75rem 0.85rem;
+      border: 1px solid rgba(217, 79, 43, 0.28);
+      background: rgba(5, 6, 8, 0.82);
+      font-family: var(--font-mono);
+      font-size: 0.64rem;
+      color: var(--muted);
+    }
+
+    .graph-status strong {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      color: var(--accent);
+    }
+
+    .graph-edge {
+      position: absolute;
+      height: 2px;
+      transform-origin: left center;
+      background: linear-gradient(90deg, rgba(217, 79, 43, 0.08), rgba(217, 79, 43, 0.62), rgba(245, 245, 245, 0.18));
+      opacity: 0.18;
+      animation: edgePulse 4.8s var(--ease-out) infinite;
+      overflow: hidden;
+    }
+
+    .graph-edge::after {
+      content: "";
+      position: absolute;
+      inset: -5px 0;
+      background: linear-gradient(90deg, transparent 0%, transparent 35%, rgba(245, 245, 245, 0.95) 48%, rgba(217, 79, 43, 0.92) 56%, transparent 70%, transparent 100%);
+      background-size: 220% 100%;
+      background-position: 130% 0;
+      filter: drop-shadow(0 0 12px rgba(217, 79, 43, 0.72));
+      animation: edgePacket 4.8s var(--ease-out) infinite;
+      animation-delay: inherit;
+    }
+
+    .graph-node {
+      position: absolute;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 0.12rem;
+      width: 6.7rem;
+      min-height: 5.2rem;
+      padding: 0.8rem;
+      border: 1px solid rgba(245, 245, 245, 0.2);
+      background: rgba(10, 12, 14, 0.9);
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: var(--text);
+      text-align: center;
+      box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+      transition: border-color 220ms var(--ease-out), color 220ms var(--ease-out), transform 220ms var(--ease-out);
+    }
+
+    .graph-node::before {
+      content: attr(data-id);
+      font-family: var(--font-mono);
+      font-size: 0.55rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .graph-node::after {
+      content: attr(data-status);
+      margin-top: 0.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.54rem;
+      font-weight: 400;
+      color: rgba(217, 79, 43, 0.92);
+    }
+
+    .graph-node.source {
+      border-color: var(--accent);
+      color: var(--accent);
+      animation: nodeSource 4.8s var(--ease-out) infinite;
+    }
+
+    .graph-node.impact {
+      animation: nodeImpact 4.8s var(--ease-out) infinite;
+    }
+
+    .cascade-log {
+      position: absolute;
+      left: 1rem;
+      bottom: 1rem;
+      z-index: 2;
+      display: grid;
+      gap: 0.35rem;
+      width: min(48%, 18rem);
+      padding: 0.75rem 0.85rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(5, 6, 8, 0.82);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      color: var(--muted);
+    }
+
+    .cascade-log span {
+      display: flex;
+      justify-content: space-between;
+      gap: 1rem;
+      opacity: 0.45;
+      animation: logActivate 4.8s var(--ease-out) infinite;
+    }
+
+    .cascade-log span:nth-child(2) { animation-delay: 0.45s; }
+    .cascade-log span:nth-child(3) { animation-delay: 0.8s; }
+    .cascade-log span:nth-child(4) { animation-delay: 1.05s; }
+
+    .cascade-log strong {
+      font-family: var(--font-display);
+      color: var(--text);
+    }
+
+    .impact-counter {
+      position: absolute;
+      right: 1rem;
+      bottom: 1rem;
+      font-family: var(--font-display);
+      font-size: clamp(2.25rem, 5vw, 4.5rem);
+      font-weight: 700;
+      color: var(--accent);
+      text-shadow: 0 0 28px rgba(217, 79, 43, 0.22);
+    }
+
+    .impact-counter span {
+      display: block;
+      margin-top: 0.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 400;
+      color: var(--muted);
+    }
+
+    .priority-demo {
+      max-width: 980px;
+      min-height: 540px;
+      margin: 3rem auto 0;
+      padding: clamp(1rem, 2vw, 1.5rem);
+    }
+
+    .rank-list {
+      display: grid;
+      gap: 0.75rem;
+      margin-top: 3.25rem;
+    }
+
+    .rank-row {
+      display: grid;
+      grid-template-columns: 3rem 1fr auto;
+      gap: 1rem;
+      align-items: center;
+      padding: 1rem;
+      border: 1px solid var(--border);
+      background: rgba(12, 12, 12, 0.86);
+      animation: rankPulse 5.2s var(--ease-out) infinite;
+    }
+
+    .rank-row:nth-child(2) { animation-delay: 0.2s; }
+    .rank-row:nth-child(3) { animation-delay: 0.4s; }
+
+    .rank-number,
+    .rank-score {
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .rank-title {
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      color: var(--text);
+    }
+
+    .rank-meta {
+      display: block;
+      margin-top: 0.2rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    .formula {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: clamp(0.8rem, 1.6vw, 1.35rem);
+      margin-top: clamp(2.75rem, 5vw, 4.25rem);
+      font-family: var(--font-display);
+      font-weight: 700;
+      color: var(--text);
+    }
+
+    .formula span {
+      padding: clamp(1rem, 1.8vw, 1.45rem) clamp(1.1rem, 2vw, 1.8rem);
+      border: 1px solid rgba(217, 79, 43, 0.42);
+      background: rgba(217, 79, 43, 0.095);
+      font-size: clamp(1.2rem, 2vw, 1.85rem);
+      line-height: 1;
+      box-shadow: 0 0 32px rgba(217, 79, 43, 0.08);
+    }
+
+    .formula .operator {
+      border-color: transparent;
+      background: transparent;
+      padding-left: 0;
+      padding-right: 0;
+      color: var(--accent);
+      font-size: clamp(1.5rem, 2vw, 2rem);
+    }
+
+    .centered-section {
+      text-align: center;
+    }
+
+    .centered-section .section-title,
+    .centered-section .section-copy {
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    #company {
+      background: #080a0d;
+      scroll-margin-top: 56px;
+    }
+
+    .logo-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 1rem;
+      margin-top: 2.5rem;
+    }
+
+    .integrations-section {
+      background:
+        radial-gradient(ellipse 50% 42% at 18% 28%, rgba(217, 79, 43, 0.045), transparent 70%),
+        #050608;
+      scroll-margin-top: 56px;
+    }
+
+    .trust-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-top: 2.5rem;
+    }
+
+    .data-pill,
+    .trust-item {
+      min-height: 6rem;
+      padding: 1.05rem;
+      border: 1px solid var(--border);
+      background: rgba(9, 9, 9, 0.72);
+    }
+
+    .data-pill {
+      display: grid;
+      gap: 0.9rem;
+      text-align: left;
+    }
+
+    .data-category {
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.12em;
+      color: var(--accent);
+      text-transform: uppercase;
+    }
+
+    .logo-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+
+    .logo-mark {
+      display: inline-flex;
+      align-items: center;
+      min-height: 2.1rem;
+      padding: 0.35rem 0.55rem;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.025);
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      line-height: 1;
+      color: var(--text);
+      letter-spacing: 0.03em;
+    }
+
+    .data-pill strong,
+    .trust-item strong {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      line-height: 1.1;
+      color: var(--text);
+    }
+
+    .data-pill > span:not(.data-category),
+    .trust-item span {
+      display: block;
+      margin-top: 0.55rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      line-height: 1.45;
+      color: var(--muted);
+    }
+
+    .closing-cta {
+      isolation: isolate;
+      text-align: center;
+      min-height: calc(100vh - 56px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      scroll-margin-top: 56px;
+    }
+
+    .closing-cta::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      background: transparent;
+    }
+
+    .closing-cta .section-inner {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .closing-cta .section-inner::before {
+      content: "";
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      z-index: -1;
+      width: min(760px, 90vw);
+      height: 360px;
+      transform: translate(-50%, -50%);
+      background: radial-gradient(ellipse at center, rgba(0, 0, 0, 0.78) 0%, rgba(0, 0, 0, 0.46) 42%, transparent 72%);
+      pointer-events: none;
+    }
+
+    .closing-cta .section-kicker {
+      margin-bottom: 1rem;
+      text-shadow:
+        0 0 14px rgba(0, 0, 0, 0.95),
+        0 0 32px rgba(0, 0, 0, 0.85);
+    }
+
+    .closing-cta .section-title {
+      max-width: 680px;
+      text-align: center;
+    }
+
+    .closing-cta .line-emphasis {
+      color: var(--accent);
+    }
+
+    .closing-cta .cta-row {
+      justify-content: center;
+      margin-top: 2rem;
+      margin-bottom: 1rem;
+    }
+
+    .pilot-note {
+      max-width: 62ch;
+      margin: 0 auto;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.6;
+      color: var(--muted);
+    }
+
+    @keyframes classifyDamage {
+      0%, 16% { opacity: 0; transform: translateY(8px) scale(0.96); }
+      28%, 82% { opacity: 1; transform: translateY(0) scale(1); }
+      100% { opacity: 0.35; transform: translateY(0) scale(1); }
+    }
+
+    @keyframes edgePulse {
+      0%, 22% { opacity: 0.12; box-shadow: none; }
+      36%, 70% { opacity: 0.9; box-shadow: 0 0 18px rgba(217, 79, 43, 0.38); }
+      100% { opacity: 0.2; box-shadow: none; }
+    }
+
+    @keyframes edgePacket {
+      0%, 18% { background-position: 130% 0; opacity: 0; }
+      30% { opacity: 1; }
+      74% { background-position: -40% 0; opacity: 1; }
+      100% { background-position: -40% 0; opacity: 0; }
+    }
+
+    @keyframes nodeSource {
+      0%, 100% { box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34), 0 0 0 rgba(217, 79, 43, 0); }
+      22%, 76% { box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34), 0 0 42px rgba(217, 79, 43, 0.46); }
+    }
+
+    @keyframes nodeImpact {
+      0%, 32% { border-color: rgba(245, 245, 245, 0.18); color: var(--text); opacity: 0.62; transform: translateY(0); }
+      50%, 82% { border-color: var(--accent); color: var(--accent); opacity: 1; transform: translateY(-3px); box-shadow: 0 16px 44px rgba(0, 0, 0, 0.38), 0 0 34px rgba(217, 79, 43, 0.32); }
+      100% { border-color: rgba(217, 79, 43, 0.45); color: var(--accent); opacity: 0.8; transform: translateY(0); }
+    }
+
+    @keyframes logActivate {
+      0%, 34% { opacity: 0.42; color: var(--muted); }
+      48%, 78% { opacity: 1; color: var(--text); }
+      100% { opacity: 0.56; color: var(--muted); }
+    }
+
+    @keyframes rankPulse {
+      0%, 22% { border-color: var(--border); transform: translateX(0); }
+      38%, 74% { border-color: rgba(217, 79, 43, 0.68); transform: translateX(6px); }
+      100% { border-color: var(--border); transform: translateX(0); }
+    }
+
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 100;
+      display: none;
+      place-items: center;
+      padding: var(--gutter);
+      background: rgba(5, 7, 9, 0.82);
+      backdrop-filter: blur(16px);
+    }
+
+    .modal[aria-hidden="false"] {
+      display: grid;
+    }
+
+    .modal-card {
+      width: min(100%, 56rem);
+      background: var(--bg-deep);
+      border: 1px solid var(--accent);
+      box-shadow: 0 30px 90px rgba(0, 0, 0, 0.7);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--rule);
+    }
+
+    .modal-head h2 {
+      font-family: var(--font-display);
+      font-size: clamp(1.4rem, 3vw, 2.2rem);
+      letter-spacing: -0.02em;
+      text-transform: none;
+    }
+
+    .modal-close {
+      min-width: 44px;
+      min-height: 44px;
+      border: 1px solid var(--rule);
+      color: var(--muted);
+      font-size: 1.3rem;
+      transition: color 160ms var(--ease-out), border-color 160ms var(--ease-out);
+    }
+
+    .modal-close:hover,
+    .modal-close:focus-visible {
+      color: var(--text);
+      border-color: var(--accent);
+      outline: none;
+    }
+
+    .modal-video {
+      aspect-ratio: 16 / 9;
+      position: relative;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 60% 40% at 50% 55%, rgba(217, 79, 43, 0.16), transparent 70%),
+        radial-gradient(ellipse 80% 60% at 60% 70%, rgba(20, 20, 20, 0.44), transparent 70%),
+        var(--bg-deep);
+      display: grid;
+      place-items: center;
+    }
+
+    .play-button {
+      width: 4.5rem;
+      height: 4.5rem;
+      border-radius: 50%;
+      border: 1px solid var(--accent-warm);
+      background: rgba(217, 79, 43, 0.5);
+      color: var(--text);
+      font-size: 1.5rem;
+      box-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    .modal-body {
+      padding: 1rem 1.25rem 1.25rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+    }
+
+    @keyframes riseIn {
+      from { opacity: 0; transform: translateY(0.85rem); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes cuePulse {
+      0%, 100% { opacity: 0.25; }
+      50% { opacity: 0.85; }
+    }
+
+    @media (max-width: 1024px) {
+      .hero-content {
+        grid-template-columns: minmax(0, 1fr);
+        align-items: start;
+        padding-top: clamp(2rem, 5vh, 3rem);
+        padding-bottom: clamp(3rem, 6vh, 4rem);
+      }
+
+      .features-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .feature p {
+        max-width: 42ch;
+      }
+
+      .problem-grid,
+      .eye-section,
+      .eye-section.reverse {
+        grid-template-columns: 1fr;
+      }
+
+      .eye-section.reverse .eye-copy {
+        order: 0;
+      }
+
+      .logo-grid,
+      .trust-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .left-mask {
+        background: linear-gradient(180deg, var(--bg-deep) 0%, rgba(5, 7, 9, 0.85) 30%, rgba(5, 7, 9, 0.55) 60%, transparent 80%);
+      }
+    }
+
+    @media (max-width: 768px) {
+      .city-canvas { display: none; }
+      .city-fallback { display: block; }
+      .ambient-glow { opacity: 0.5; }
+
+      .nav a:not([aria-current="page"]) { display: none; }
+
+      .nav-cta {
+        display: none;
+      }
+
+      h1 {
+        font-size: clamp(3rem, 13vw, 4.4rem);
+      }
+
+      .problem-stats,
+      .logo-grid,
+      .trust-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .rank-row {
+        grid-template-columns: 2rem 1fr;
+      }
+
+      .rank-score {
+        grid-column: 2;
+      }
+
+      .stats {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .stat {
+        width: 100%;
+      }
+
+      .scroll-cue { display: none; }
+    }
+
+    @media (hover: none) {
+      .btn:hover { transform: none; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to main content</a>
+
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="TriNetra home">
+      <span>TriNetra AI</span>
+      <span class="brand-mark" aria-hidden="true">◈</span>
+    </a>
+    <nav class="nav" aria-label="Primary">
+      <a href="#solutions" aria-current="page">TriNetra</a>
+      <a href="#three-eyes">Three Eyes</a>
+      <a href="#integrations">Integration</a>
+    </nav>
+    <a class="nav-cta" href="demo.html">View Demo</a>
+  </header>
+
+  <main id="main" class="page-content">
+    <section class="hero" id="solutions" aria-labelledby="hero-title">
+      <canvas class="city-canvas" id="cityCanvas" aria-hidden="true"></canvas>
+      <div class="city-fallback" aria-hidden="true"></div>
+      <div class="ambient-glow" aria-hidden="true"></div>
+      <div class="left-mask" aria-hidden="true"></div>
+      <div class="vignette" aria-hidden="true"></div>
+      <div class="scanlines" aria-hidden="true"></div>
+
+      <div class="hero-content">
+        <div class="hero-text">
+          <h1 id="hero-title">
+            <span class="line">When Infrastructure Fails,</span>
+            <span class="line">People Are Waiting.</span>
+            <span class="line line-emphasis">Know Who Needs You First.</span>
+          </h1>
+          <p class="hero-sub">
+            TriNetra AI combines satellite imagery analysis, infrastructure dependency mapping, and real-time cascade modeling to help emergency teams make faster decisions in the critical first 72 hours.
+          </p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="demo.html">View Demo</a>
+            <a class="btn btn-ghost" href="https://www.linkedin.com/in/adam-banks-a00a61378/" target="_blank" rel="noopener noreferrer" data-contact-linkedin>Contact Us</a>
+          </div>
+        </div>
+        <div aria-hidden="true"></div>
+      </div>
+
+      <a class="scroll-cue" href="#technology" aria-label="Scroll to capabilities"></a>
+    </section>
+
+    <section class="features reveal-section" id="technology" aria-label="Capabilities">
+      <h2 class="visually-hidden">The Three Eyes</h2>
+      <div class="features-grid">
+        <article class="feature">
+          <p>Damage classified in under 90 seconds.</p>
+        </article>
+
+        <article class="feature">
+          <p>Cascade calculated in under 400ms.</p>
+        </article>
+
+        <article class="feature">
+          <p>Restoration ranked before teams mobilize.</p>
+        </article>
+      </div>
+    </section>
+
+    <section class="section problem-section" aria-labelledby="problem-title">
+      <div class="section-inner problem-grid">
+        <div>
+          <p class="section-kicker">
+            <svg class="problem-kicker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3 21 19H3L12 3Z"/>
+              <path d="M12 8v5"/>
+              <path d="M12 17h.01"/>
+            </svg>
+            <span>The problem</span>
+          </p>
+          <h2 class="pull-quote" id="problem-title">When Maria made landfall, 95% of Puerto Rico lost power.</h2>
+          <p class="story-note">Hospitals had 72 hours of generator fuel. Utility crews had no map of what depended on what.</p>
+          <p class="story-note">TriNetra was built so the next response team doesn&rsquo;t fly blind.</p>
+        </div>
+        <div class="problem-stats" role="list">
+          <div class="stat-item" role="listitem">
+            <div class="stat-number" data-target="3.4" data-prefix="" data-suffix="M" data-decimals="1" data-duration="1200" data-display="3.4M">0.0M</div>
+            <div class="stat-label">people affected</div>
+          </div>
+          <div class="stat-item" role="listitem">
+            <div class="stat-number" data-target="11" data-prefix="" data-suffix="" data-decimals="0" data-duration="1000" data-display="11">0</div>
+            <div class="stat-label">months to full power restoration</div>
+          </div>
+          <div class="stat-item" role="listitem">
+            <div class="stat-number" data-target="90" data-prefix="$" data-suffix="B" data-decimals="0" data-duration="1400" data-display="$90B">$0B</div>
+            <div class="stat-label">in damages</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="three-eyes-heading reveal-section" id="three-eyes" aria-labelledby="three-eyes-title">
+      <div class="three-eyes-mark" aria-hidden="true"><span>◉</span><span>◉</span><span>◉</span></div>
+      <div class="three-eyes-title-row">
+        <h2 id="three-eyes-title">TriNetra: The Three Eyes</h2>
+      </div>
+      <p>Three layers of intelligence. One decision surface.</p>
+    </section>
+
+    <section class="section eye-story reveal-section" aria-labelledby="eye-damage-title">
+      <div class="section-inner eye-section">
+        <div class="eye-copy">
+          <p class="section-kicker">
+            <svg class="eye-kicker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M3 12s3.5-6 9-6 9 6 9 6-3.5 6-9 6-9-6-9-6Z"/>
+              <circle cx="12" cy="12" r="2.8"/>
+            </svg>
+            <span>Eye 1: Damage Detection</span>
+          </p>
+          <h2 class="section-title" id="eye-damage-title">See What Broke, The Moment Imagery Arrives</h2>
+          <p class="section-copy">TriNetra ingests satellite and aerial imagery from Maxar, Planet Labs, and NOAA the moment it&rsquo;s captured. Computer vision automatically segments every structure in the affected area and classifies it: destroyed, major damage, minor damage, or affected. No manual review. No queue.</p>
+        </div>
+        <div class="demo-loop" aria-label="Animated damage classification demonstration">
+          <div class="demo-label">Imagery classification loop</div>
+          <div class="satellite-frame" data-source="https://maxar-opendata.s3.amazonaws.com/events/Hurricane-Ian-9-26-2022/ard/17/031313331010/2022-10-03/10300100DCA2CF00-visual.tif" aria-hidden="true"></div>
+          <span class="damage-cell minor" data-severity="minor" aria-hidden="true"></span>
+          <span class="damage-cell major" data-severity="major" aria-hidden="true"></span>
+          <span class="damage-cell destroyed" data-severity="destroyed" aria-hidden="true"></span>
+          <span class="damage-cell minor" data-severity="minor" aria-hidden="true"></span>
+          <span class="damage-cell major" data-severity="major" aria-hidden="true"></span>
+          <span class="damage-cell destroyed" data-severity="destroyed" aria-hidden="true"></span>
+          <span class="damage-cell major" data-severity="major" aria-hidden="true"></span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section eye-story reveal-section" aria-labelledby="eye-graph-title">
+      <div class="section-inner eye-section reverse">
+        <div class="eye-copy">
+          <p class="section-kicker">
+            <svg class="eye-kicker-icon eye-kicker-icon-graph" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="6" cy="12" r="2.4"/>
+              <circle cx="17" cy="6" r="2.4"/>
+              <circle cx="18" cy="17" r="2.4"/>
+              <path d="M8.2 11 14.8 7.2"/>
+              <path d="M8.3 13.1 15.7 16.1"/>
+            </svg>
+            <span>Eye 2: The Dependency Graph</span>
+          </p>
+          <h2 class="section-title" id="eye-graph-title">One Substation Goes Down. Find Out What Goes With It.</h2>
+          <p class="section-copy">Behind every city is an invisible web: power flows to water treatment, which flows to hospitals, which flow to the people who need them most. TriNetra maps 14 types of infrastructure dependency so when something breaks, you instantly see everything it takes with it.</p>
+        </div>
+        <div class="demo-loop" aria-label="Animated dependency graph cascade">
+          <div class="demo-label">Dependency traversal loop</div>
+          <div class="graph-canvas" aria-hidden="true"></div>
+          <div class="graph-status" aria-hidden="true">
+            <strong>Live cascade</strong>
+            <span>source: substation outage</span>
+            <span>depth: 4 downstream hops</span>
+          </div>
+          <span class="graph-edge" style="left: 25%; top: 43%; width: 30%; transform: rotate(18deg); animation-delay: 0.1s;" aria-hidden="true"></span>
+          <span class="graph-edge" style="left: 45%; top: 50%; width: 27%; transform: rotate(-29deg); animation-delay: 0.55s;" aria-hidden="true"></span>
+          <span class="graph-edge" style="left: 44%; top: 54%; width: 27%; transform: rotate(34deg); animation-delay: 0.9s;" aria-hidden="true"></span>
+          <span class="graph-edge" style="left: 55%; top: 40%; width: 19%; transform: rotate(42deg); animation-delay: 1.2s;" aria-hidden="true"></span>
+          <span class="graph-node source" data-id="PWR-041" data-status="source fault" style="left: 13%; top: 34%;">Substation</span>
+          <span class="graph-node impact" data-id="WTR-118" data-status="water pressure at risk" style="left: 41%; top: 48%; animation-delay: 0.45s;">Water Plant</span>
+          <span class="graph-node impact" data-id="MED-003" data-status="generator clock starts" style="left: 65%; top: 21%; animation-delay: 0.8s;">Hospital</span>
+          <span class="graph-node impact" data-id="SHL-012" data-status="capacity reroute" style="left: 67%; top: 63%; animation-delay: 1.05s;">Shelter</span>
+          <span class="graph-node impact" data-id="COM-076" data-status="backhaul degraded" style="left: 46%; top: 17%; animation-delay: 1.25s;">Cell Tower</span>
+          <div class="cascade-log" aria-hidden="true">
+            <span><strong>PWR-041</strong>fault detected</span>
+            <span><strong>WTR-118</strong>pressure risk</span>
+            <span><strong>MED-003</strong>generator clock</span>
+            <span><strong>SHL-012</strong>reroute capacity</span>
+          </div>
+          <div class="impact-counter" aria-hidden="true">28,400<span>people exposed downstream</span></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section centered-section eye-priority-section reveal-section" aria-labelledby="eye-priority-title">
+      <div class="section-inner">
+        <p class="section-kicker">
+          <svg class="eye-kicker-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M5 19h14"/>
+            <path d="M7 16l4-4 3 3 5-7"/>
+            <path d="M17 8h2v2"/>
+          </svg>
+          <span>Eye 3: Priority Scoring</span>
+        </p>
+        <h2 class="section-title" id="eye-priority-title">Not a Map Full of Red Dots. A List That Tells You What to Do.</h2>
+        <p class="section-copy">Every damaged asset gets a priority score combining three factors: how many people it serves, how critical its facility tier is, and how many downstream assets depend on it. The result is a ranked restoration list your field teams can actually act on.</p>
+        <div class="demo-loop priority-demo" aria-label="Animated priority dashboard demonstration">
+          <div class="demo-label">Priority dashboard loop</div>
+          <div class="rank-list">
+            <div class="rank-row">
+              <span class="rank-number">01</span>
+              <div>
+                <span class="rank-title">Caguas North Substation</span>
+                <span class="rank-meta">Serves hospital cluster, water treatment, 3 shelters</span>
+              </div>
+              <span class="rank-score">97.4</span>
+            </div>
+            <div class="rank-row">
+              <span class="rank-number">02</span>
+              <div>
+                <span class="rank-title">Arecibo Water Treatment Plant</span>
+                <span class="rank-meta">Downstream potable water dependency, 41,200 residents</span>
+              </div>
+              <span class="rank-score">91.8</span>
+            </div>
+            <div class="rank-row">
+              <span class="rank-number">03</span>
+              <div>
+                <span class="rank-title">Route PR-52 Switchyard</span>
+                <span class="rank-meta">Restores corridor access for two field staging areas</span>
+              </div>
+              <span class="rank-score">86.2</span>
+            </div>
+          </div>
+          <div class="formula" aria-label="Priority score formula">
+            <span>Population Served</span>
+            <span class="operator">&times;</span>
+            <span>Criticality Tier</span>
+            <span class="operator">&times;</span>
+            <span>Cascade Depth</span>
+            <span class="operator">=</span>
+            <span>Priority Score</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section centered-section integrations-section reveal-section" id="integrations" aria-labelledby="integrations-title">
+      <div class="section-inner">
+        <p class="section-kicker">Integrations</p>
+        <h2 class="section-title" id="integrations-title">Built on the Data You Already Depend On</h2>
+        <p class="section-copy">TriNetra connects to the infrastructure data sources emergency managers and utility operators already use, no custom data pipeline required.</p>
+        <div class="logo-grid" aria-label="Data source and integration categories">
+          <div class="data-pill">
+            <span class="data-category">Imagery</span>
+            <div class="logo-row" aria-label="Imagery providers">
+              <span class="logo-mark">MAXAR</span>
+              <span class="logo-mark">PLANET</span>
+              <span class="logo-mark">NOAA</span>
+            </div>
+            <span>Post-event satellite and aerial collection</span>
+          </div>
+          <div class="data-pill">
+            <span class="data-category">Infrastructure Registry</span>
+            <div class="logo-row" aria-label="Infrastructure registries">
+              <span class="logo-mark">HIFLD</span>
+              <span class="logo-mark">TIGER</span>
+            </div>
+            <span>Critical facilities, roads, parcels, and census geometry</span>
+          </div>
+          <div class="data-pill">
+            <span class="data-category">Real-Time Feeds</span>
+            <div class="logo-row" aria-label="Real time operational feeds">
+              <span class="logo-mark">SCADA</span>
+              <span class="logo-mark">911</span>
+            </div>
+            <span>Operational telemetry and emergency call signals</span>
+          </div>
+          <div class="data-pill">
+            <span class="data-category">Output Integrations</span>
+            <div class="logo-row" aria-label="Output integrations">
+              <span class="logo-mark">ESRI</span>
+              <span class="logo-mark">FEMA</span>
+            </div>
+            <span>GIS publishing, reporting, and readiness workflows</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section centered-section reveal-section" id="company" aria-labelledby="trust-title">
+      <div class="section-inner">
+        <p class="section-kicker">Deployment</p>
+        <h2 class="section-title" id="trust-title">Built for Government. Ready for Deployment.</h2>
+        <div class="trust-grid">
+          <div class="trust-item">
+            <strong>FedRAMP Aligned</strong>
+            <span>NIST 800-53 security controls</span>
+          </div>
+          <div class="trust-item">
+            <strong>GPU-Accelerated</strong>
+            <span>NVIDIA DGX Spark infrastructure</span>
+          </div>
+          <div class="trust-item">
+            <strong>OAuth 2.0 / JWT</strong>
+            <span>Role-based access: Admin, Analyst, Operator, Viewer</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section closing-cta reveal-section" id="contact" aria-labelledby="closing-title">
+      <div class="section-inner">
+        <h2 class="section-title" id="closing-title">
+          <span>The Next Disaster Won&rsquo;t Wait.</span>
+          <span class="line-emphasis">Neither Should Your Response.</span>
+        </h2>
+        <div class="cta-row">
+          <a class="btn btn-primary" href="demo.html">View Demo</a>
+          <a class="btn btn-ghost" href="https://www.linkedin.com/in/adam-banks-a00a61378/" target="_blank" rel="noopener noreferrer" data-contact-linkedin>Contact Us</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="modal" id="demoModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modal-title">
+    <div class="modal-card">
+      <div class="modal-head">
+        <h2 id="modal-title">Live Response Intelligence Demo</h2>
+        <button class="modal-close" type="button" data-close-demo aria-label="Close demo video">&times;</button>
+      </div>
+      <div class="modal-video" aria-label="Demo video placeholder">
+        <button class="play-button" type="button" aria-label="Play demo video">&#9658;</button>
+      </div>
+      <div class="modal-body">
+        Demo placeholder. Wire this to a 60-90 second product walkthrough showing imagery classification, dependency traversal, and priority scoring during a disaster response scenario.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    (function () {
+      "use strict";
+
+      const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const smallScreen = () => window.innerWidth < 768;
+      const canvas = document.getElementById("cityCanvas");
+      const overlayCanvas = document.createElement("canvas");
+      overlayCanvas.setAttribute("aria-hidden", "true");
+      overlayCanvas.style.position = "fixed";
+      overlayCanvas.style.inset = "0";
+      overlayCanvas.style.zIndex = "0";
+      overlayCanvas.style.width = "100%";
+      overlayCanvas.style.height = "100%";
+      overlayCanvas.style.pointerEvents = "none";
+      canvas.after(overlayCanvas);
+
+      let cityWorker = null;
+      let cityRuntime = null;
+      let cityWorkerReady = false;
+      const cityWorkerSrc = "city-worker-webgl.js";
+      const citySize = () => ({
+        width: window.innerWidth,
+        height: window.innerHeight,
+        dpr: Math.min(window.devicePixelRatio || 1, 2)
+      });
+
+      function cityHidden() {
+        return document.hidden || smallScreen();
+      }
+
+      function postCityResize() {
+        const size = citySize();
+        if (cityWorkerReady && cityWorker) {
+          cityWorker.postMessage({ type: "resize", width: size.width, height: size.height, dpr: size.dpr });
+          cityWorker.postMessage({ type: "visibility", hidden: cityHidden() });
+        } else if (cityRuntime) {
+          cityRuntime.resize(size.width, size.height, size.dpr);
+          cityRuntime.setVisibility(cityHidden());
+        }
+      }
+
+      function postCityVisibility() {
+        if (cityWorkerReady && cityWorker) {
+          cityWorker.postMessage({ type: "visibility", hidden: cityHidden() });
+        } else if (cityRuntime) {
+          cityRuntime.setVisibility(cityHidden());
+        }
+      }
+
+      function postCityThrottle(fps) {
+        if (cityWorkerReady && cityWorker) {
+          cityWorker.postMessage({ type: "throttle", fps });
+        } else if (cityRuntime) {
+          cityRuntime.setThrottle(fps);
+        }
+      }
+
+      function initCityMainThreadFallback() {
+        const script = document.createElement("script");
+        script.src = cityWorkerSrc;
+        script.onload = function () {
+          const size = citySize();
+          cityRuntime = window.initCityMainThread({
+            canvas,
+            overlayCanvas,
+            width: size.width,
+            height: size.height,
+            dpr: size.dpr,
+            reducedMotion,
+            hidden: cityHidden()
+          });
+        };
+        document.head.appendChild(script);
+      }
+
+      if (canvas.transferControlToOffscreen && overlayCanvas.transferControlToOffscreen && window.Worker) {
+        const size = citySize();
+        const offscreen = canvas.transferControlToOffscreen();
+        const overlayOffscreen = overlayCanvas.transferControlToOffscreen();
+        cityWorker = new Worker(cityWorkerSrc);
+        cityWorker.postMessage({
+          type: "init",
+          canvas: offscreen,
+          overlayCanvas: overlayOffscreen,
+          width: size.width,
+          height: size.height,
+          dpr: size.dpr,
+          reducedMotion,
+          hidden: cityHidden()
+        }, [offscreen, overlayOffscreen]);
+        cityWorkerReady = true;
+      } else {
+        initCityMainThreadFallback();
+      }
+
+      window.addEventListener("resize", postCityResize);
+      document.addEventListener("visibilitychange", postCityVisibility);
+
+      const fullRateCitySections = [document.querySelector(".hero"), document.querySelector(".closing-cta")]
+        .filter(Boolean);
+      const fullRateVisibleSections = new Set();
+      if (fullRateCitySections.length && "IntersectionObserver" in window) {
+        const cityThrottleObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting) fullRateVisibleSections.add(entry.target);
+            else fullRateVisibleSections.delete(entry.target);
+          });
+          postCityThrottle(fullRateVisibleSections.size ? 60 : 20);
+        }, { threshold: 0 });
+        fullRateCitySections.forEach(function (section) {
+          cityThrottleObserver.observe(section);
+        });
+      }
+
+      const nav = document.querySelector(".nav");
+      const topbar = document.querySelector(".topbar");
+      const navLinks = nav ? Array.from(nav.querySelectorAll('a[href^="#"]')) : [];
+      const navTargets = navLinks
+        .map(function (link) {
+          const id = link.getAttribute("href").slice(1);
+          return { link: link, section: document.getElementById(id) };
+        })
+        .filter(function (item) {
+          return item.section;
+        });
+      let navFramePending = false;
+      let activeScrollTarget = null;
+
+      function setActiveNav(link) {
+        navLinks.forEach(function (item) {
+          if (item === link) item.setAttribute("aria-current", "page");
+          else item.removeAttribute("aria-current");
+        });
+
+        if (!nav || !link) return;
+        const navRect = nav.getBoundingClientRect();
+        const textRange = document.createRange();
+        textRange.selectNodeContents(link);
+        const textRect = textRange.getBoundingClientRect();
+        const linkRect = link.getBoundingClientRect();
+        const indicatorWidth = textRect.width || linkRect.width;
+        const indicatorLeft = (textRect.width ? textRect.left : linkRect.left) - navRect.left;
+        nav.style.setProperty("--nav-indicator-left", indicatorLeft + "px");
+        nav.style.setProperty("--nav-indicator-width", indicatorWidth + "px");
+        nav.style.setProperty("--nav-indicator-opacity", "1");
+      }
+
+      function updateActiveNav() {
+        if (!navTargets.length) return;
+        if (activeScrollTarget) {
+          if (Math.abs(window.scrollY - activeScrollTarget.top) <= 2) {
+            activeScrollTarget = null;
+          } else {
+            return;
+          }
+        }
+
+        const activationLine = (topbar ? topbar.offsetHeight : 56) + 1;
+        let active = navTargets[0];
+        navTargets.forEach(function (item) {
+          if (item.section.getBoundingClientRect().top <= activationLine) active = item;
+        });
+        setActiveNav(active.link);
+      }
+
+      function requestActiveNavUpdate() {
+        if (navFramePending) return;
+        navFramePending = true;
+        requestAnimationFrame(function () {
+          navFramePending = false;
+          updateActiveNav();
+        });
+      }
+
+      function cancelNavScrollTarget() {
+        if (!activeScrollTarget) return;
+        activeScrollTarget = null;
+        requestActiveNavUpdate();
+      }
+
+      function scrollToHeaderAligned(target) {
+        const headerOffset = topbar ? topbar.offsetHeight : 56;
+        const maxScrollTop = document.documentElement.scrollHeight - window.innerHeight;
+        return Math.max(0, Math.min(target.getBoundingClientRect().top + window.scrollY - headerOffset, maxScrollTop));
+      }
+
+      navLinks.forEach(function (link) {
+        link.addEventListener("click", function (event) {
+          const target = document.getElementById(link.getAttribute("href").slice(1));
+          if (target) {
+            event.preventDefault();
+            const targetTop = scrollToHeaderAligned(target);
+            activeScrollTarget = { link: link, top: targetTop };
+            window.scrollTo({ top: targetTop, behavior: "smooth" });
+          }
+          setActiveNav(link);
+        });
+      });
+
+      const scrollCue = document.querySelector(".scroll-cue");
+      if (scrollCue) {
+        scrollCue.addEventListener("click", function (event) {
+          const target = document.getElementById(scrollCue.getAttribute("href").slice(1));
+          if (!target) return;
+          event.preventDefault();
+          activeScrollTarget = null;
+          window.scrollTo({ top: scrollToHeaderAligned(target), behavior: "smooth" });
+        });
+      }
+
+      window.addEventListener("scroll", requestActiveNavUpdate, { passive: true });
+      window.addEventListener("resize", requestActiveNavUpdate);
+      window.addEventListener("wheel", cancelNavScrollTarget, { passive: true });
+      window.addEventListener("touchstart", cancelNavScrollTarget, { passive: true });
+      window.addEventListener("keydown", function (event) {
+        if (["ArrowUp", "ArrowDown", "PageUp", "PageDown", "Home", "End", " "].includes(event.key)) {
+          cancelNavScrollTarget();
+        }
+      });
+      updateActiveNav();
+      if (document.fonts && document.fonts.ready) {
+        document.fonts.ready.then(requestActiveNavUpdate);
+      }
+
+      function formatNumber(value, decimals, useCommas) {
+        const rounded = Number(value.toFixed(decimals));
+        return useCommas ? rounded.toLocaleString("en-US") : rounded.toFixed(decimals);
+      }
+
+      function animateCounter(el, target, duration, prefix, suffix, decimals, useCommas) {
+        const start = performance.now();
+        function update(now) {
+          const elapsed = now - start;
+          const progress = Math.min(elapsed / duration, 1);
+          const eased = 1 - Math.pow(1 - progress, 3);
+          const current = eased * target;
+          el.textContent = prefix + formatNumber(current, decimals, useCommas) + suffix;
+          if (progress < 1) {
+            requestAnimationFrame(update);
+          } else if (el.dataset.display) {
+            el.textContent = el.dataset.display;
+          }
+        }
+        requestAnimationFrame(update);
+      }
+
+      function animateCounters() {
+        const counters = document.querySelectorAll(".problem-section .stat-number");
+        counters.forEach(function (counter) {
+          animateCounter(
+            counter,
+            parseFloat(counter.dataset.target || "0"),
+            parseFloat(counter.dataset.duration || "1000"),
+            counter.dataset.prefix || "",
+            counter.dataset.suffix || "",
+            parseInt(counter.dataset.decimals || "0", 10),
+            counter.dataset.commas === "true"
+          );
+        });
+      }
+
+      const problemSection = document.querySelector(".problem-section");
+      if (problemSection && "IntersectionObserver" in window) {
+        const problemObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting && !entry.target.dataset.animated) {
+              entry.target.dataset.animated = "true";
+              entry.target.classList.add("is-visible");
+              window.setTimeout(animateCounters, 280);
+              problemObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.35, rootMargin: "0px 0px -12% 0px" });
+        problemObserver.observe(problemSection);
+      } else if (problemSection) {
+        problemSection.classList.add("is-visible");
+        animateCounters();
+      }
+
+      const revealSections = document.querySelectorAll(".reveal-section");
+      if ("IntersectionObserver" in window) {
+        const revealObserver = new IntersectionObserver(function (entries) {
+          entries.forEach(function (entry) {
+            if (entry.isIntersecting && !entry.target.dataset.revealed) {
+              entry.target.dataset.revealed = "true";
+              entry.target.classList.add("is-visible");
+              revealObserver.unobserve(entry.target);
+            }
+          });
+        }, { threshold: 0.28, rootMargin: "0px 0px -12% 0px" });
+        revealSections.forEach(function (section) {
+          revealObserver.observe(section);
+        });
+      } else {
+        revealSections.forEach(function (section) {
+          section.classList.add("is-visible");
+        });
+      }
+
+      const contactLinks = Array.from(document.querySelectorAll("[data-contact-linkedin]"));
+      const linkedInProfiles = [
+        "https://www.linkedin.com/in/adam-banks-a00a61378/",
+        "https://www.linkedin.com/in/brian-jing/",
+        "https://www.linkedin.com/in/ishaan-busireddy-47a6a2217/",
+        "https://www.linkedin.com/in/hanschundekad/"
+      ];
+
+      contactLinks.forEach(function (link) {
+        link.addEventListener("click", function (event) {
+          const profile = linkedInProfiles[Math.floor(Math.random() * linkedInProfiles.length)];
+          link.href = profile;
+          event.preventDefault();
+          window.open(profile, "_blank", "noopener,noreferrer");
+        });
+      });
+
+      const modal = document.getElementById("demoModal");
+      const openButtons = document.querySelectorAll("[data-open-demo]");
+      const closeButton = document.querySelector("[data-close-demo]");
+      let lastFocus = null;
+
+      function openDemo() {
+        lastFocus = document.activeElement;
+        modal.setAttribute("aria-hidden", "false");
+        document.body.style.overflow = "hidden";
+        if (closeButton) closeButton.focus();
+      }
+
+      function closeDemo() {
+        modal.setAttribute("aria-hidden", "true");
+        document.body.style.overflow = "";
+        if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
+      }
+
+      openButtons.forEach(function (btn) {
+        btn.addEventListener("click", openDemo);
+      });
+      if (closeButton) closeButton.addEventListener("click", closeDemo);
+      modal.addEventListener("click", function (event) {
+        if (event.target === modal) closeDemo();
+      });
+      window.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && modal.getAttribute("aria-hidden") === "false") {
+          closeDemo();
+        }
+      });
+    })();
+  </script>
+</body>
+</html>
