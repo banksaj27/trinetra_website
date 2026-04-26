@@ -5,9 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="description" content="TriNetra combines satellite imagery analysis, infrastructure dependency mapping, and real-time cascade modeling to help emergency teams make faster decisions in the critical first 72 hours.">
   <title>TriNetra</title>
+  <link href="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.css" rel="stylesheet">
+  <link rel="preload" href="dependency-graph-data.js" as="script">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Fira+Code:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://api.mapbox.com/mapbox-gl-js/v3.4.0/mapbox-gl.js"></script>
   <style>
     :root {
       color-scheme: dark;
@@ -550,7 +553,7 @@
     .feature {
       position: relative;
       display: grid;
-      align-content: start;
+      align-content: center;
       gap: 0.95rem;
       padding: clamp(1.1rem, 2vw, 1.6rem) 0;
       background: transparent;
@@ -1018,7 +1021,7 @@
     }
 
     .satellite-frame::after {
-      content: "San Jose arial view (Maxar)";
+      content: "Demo ortho still (not vendor imagery)";
       position: absolute;
       right: 1rem;
       bottom: 1rem;
@@ -1136,6 +1139,32 @@
       inset: 26% 17% 18% 13%;
       border-color: rgba(217, 79, 43, 0.1);
       opacity: 0.48;
+    }
+
+    .dependency-map-demo {
+      background:
+        radial-gradient(ellipse 36% 26% at 24% 36%, rgba(217, 79, 43, 0.12), transparent 72%),
+        radial-gradient(ellipse 44% 34% at 72% 58%, rgba(245, 245, 245, 0.035), transparent 70%),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(0deg, rgba(255, 255, 255, 0.022) 1px, transparent 1px),
+        #050608;
+      background-size: 100% 100%, 100% 100%, 48px 48px, 48px 48px, auto;
+    }
+
+    .dependency-map {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      opacity: 1;
+    }
+
+    .dependency-map .mapboxgl-canvas {
+      outline: none;
+    }
+
+    .dependency-map .mapboxgl-ctrl-logo,
+    .dependency-map .mapboxgl-ctrl-attrib {
+      display: none !important;
     }
 
     .graph-status {
@@ -1285,7 +1314,7 @@
       max-width: 980px;
       min-height: 540px;
       margin: 3rem auto 0;
-      padding: clamp(1rem, 2vw, 1.5rem);
+      padding: clamp(1rem, 2vw, 1.5rem) clamp(1rem, 2vw, 1.5rem) clamp(2.75rem, 5vw, 4rem);
     }
 
     .rank-list {
@@ -1302,17 +1331,39 @@
       padding: 1rem;
       border: 1px solid var(--border);
       background: rgba(12, 12, 12, 0.86);
-      animation: rankPulse 5.2s var(--ease-out) infinite;
+      opacity: 0;
+      transform: translate3d(2rem, 0, 0);
+      backface-visibility: hidden;
+      will-change: opacity, transform;
+      transition:
+        opacity 720ms var(--ease-out),
+        transform 720ms var(--ease-out),
+        border-color 520ms var(--ease-out),
+        box-shadow 520ms var(--ease-out);
+      transition-delay: var(--rank-delay, 0ms);
     }
 
-    .rank-row:nth-child(2) { animation-delay: 0.2s; }
-    .rank-row:nth-child(3) { animation-delay: 0.4s; }
+    .rank-row:nth-child(2) { --rank-delay: 200ms; }
+    .rank-row:nth-child(3) { --rank-delay: 400ms; }
+
+    .eye-priority-section.priority-animated .rank-row {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+      animation: rankPulse 5.2s var(--ease-out) infinite;
+      animation-delay: calc(var(--rank-delay, 0ms) + 980ms);
+    }
 
     .rank-number,
     .rank-score {
       font-family: var(--font-display);
       font-weight: 700;
       color: var(--accent);
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rank-score {
+      min-width: 3ch;
+      text-align: right;
     }
 
     .rank-title {
@@ -1330,33 +1381,164 @@
     }
 
     .formula {
+      margin-top: clamp(2.5rem, 5vw, 4rem);
+      opacity: 0;
+      transform: translateY(0.75rem);
+      transition: opacity 720ms var(--ease-out), transform 720ms var(--ease-out);
+    }
+
+    .eye-priority-section.priority-animated .formula {
+      opacity: 1;
+      transform: translateY(0);
+      transition-delay: 780ms;
+    }
+
+    .formula-panel {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: stretch;
+      max-width: 52rem;
+      margin-inline: auto;
+      padding: clamp(1.15rem, 2.4vw, 1.75rem) clamp(1rem, 2.8vw, 2.25rem);
+      border: 1px solid color-mix(in oklch, var(--border) 88%, var(--accent) 12%);
+      border-radius: 2px;
+      background: linear-gradient(
+        168deg,
+        color-mix(in oklch, var(--card) 96%, transparent) 0%,
+        color-mix(in oklch, var(--bg-deep) 70%, #0c0e12) 100%
+      );
+      box-shadow:
+        inset 0 1px 0 color-mix(in oklch, var(--text) 5.5%, transparent),
+        0 14px 42px rgba(0, 0, 0, 0.28);
+    }
+
+    .formula-eyebrow {
+      margin: 0 0 clamp(0.85rem, 2vw, 1.15rem);
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .formula-chain {
       display: flex;
       flex-wrap: wrap;
       justify-content: center;
+      align-items: stretch;
+      align-content: center;
+      width: 100%;
+      gap: 0.4rem clamp(0.55rem, 1.25vw, 0.8rem);
+    }
+
+    .formula-term {
+      display: inline-flex;
       align-items: center;
-      gap: clamp(0.8rem, 1.6vw, 1.35rem);
-      margin-top: clamp(2.75rem, 5vw, 4.25rem);
-      font-family: var(--font-display);
-      font-weight: 700;
+      justify-content: center;
+      min-height: 2.65rem;
+      padding: 0.46rem 0.68rem;
+      border: 1px solid color-mix(in oklch, var(--border) 92%, var(--text) 8%);
+      background: color-mix(in oklch, var(--card-2) 88%, transparent);
+      font-family: var(--font-mono);
+      font-size: clamp(0.7rem, 1.05vw, 0.8125rem);
+      font-weight: 500;
+      line-height: 1.25;
+      letter-spacing: -0.01em;
+      color: var(--text-2);
+      text-align: center;
+      box-shadow: inset 0 0 0 1px color-mix(in oklch, white 2.5%, transparent);
+    }
+
+    .formula-term sub {
+      font-size: 0.72em;
+      line-height: 1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .formula-term--lead {
+      border-color: color-mix(in oklch, var(--border) 75%, var(--accent) 25%);
+      background: color-mix(in oklch, var(--card-2) 78%, var(--accent) 7%);
       color: var(--text);
     }
 
-    .formula span {
-      padding: clamp(1rem, 1.8vw, 1.45rem) clamp(1.1rem, 2vw, 1.8rem);
-      border: 1px solid rgba(217, 79, 43, 0.42);
-      background: rgba(217, 79, 43, 0.095);
-      font-size: clamp(1.2rem, 2vw, 1.85rem);
+    .formula-op {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      min-height: 2.65rem;
+      padding: 0 0.1rem;
+      font-family: var(--font-display);
+      font-weight: 700;
+      font-size: clamp(1.05rem, 1.85vw, 1.35rem);
       line-height: 1;
-      box-shadow: 0 0 32px rgba(217, 79, 43, 0.08);
+      color: color-mix(in oklch, var(--accent) 72%, var(--text) 28%);
+      user-select: none;
     }
 
-    .formula .operator {
-      border-color: transparent;
-      background: transparent;
-      padding-left: 0;
-      padding-right: 0;
+    .formula-yield {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      gap: 0.65rem clamp(0.75rem, 2vw, 1.1rem);
+      margin-top: clamp(1.1rem, 2.5vw, 1.5rem);
+      padding-top: clamp(1rem, 2.2vw, 1.35rem);
+      border-top: 1px solid var(--rule);
+      text-align: center;
+    }
+
+    .formula-op--yield {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 0;
+      padding: 0;
+      font-size: clamp(1.35rem, 2.4vw, 1.75rem);
       color: var(--accent);
-      font-size: clamp(1.5rem, 2vw, 2rem);
+    }
+
+    .formula-output {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-size: clamp(1.05rem, 2vw, 1.35rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      font-variant: all-small-caps;
+      line-height: 1.2;
+      color: var(--text);
+    }
+
+    .eye-priority-section.priority-animated .formula-op:not(.formula-op--yield) {
+      animation: operatorPulse 900ms var(--ease-out) 1120ms 1 both;
+    }
+
+    @media (max-width: 520px) {
+      .formula-chain {
+        gap: 0.3rem 0.4rem;
+      }
+
+      .formula-term {
+        max-width: 100%;
+        min-height: 2.5rem;
+        font-size: 0.68rem;
+        padding: 0.45rem 0.55rem;
+      }
+
+      .formula-op {
+        min-height: 2.5rem;
+      }
+
+      .formula-term--lead {
+        max-width: 100%;
+      }
     }
 
     .centered-section {
@@ -1391,19 +1573,15 @@
     .trust-grid {
       display: grid;
       grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 0.8rem;
+      gap: 1rem;
       margin-top: 2.5rem;
     }
 
-    .data-pill,
-    .trust-item {
+    .data-pill {
       min-height: 6rem;
       padding: 1.05rem;
       border: 1px solid var(--border);
       background: rgba(9, 9, 9, 0.72);
-    }
-
-    .data-pill {
       display: grid;
       gap: 0.9rem;
       text-align: left;
@@ -1438,17 +1616,7 @@
       letter-spacing: 0.03em;
     }
 
-    .data-pill strong,
-    .trust-item strong {
-      display: block;
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      line-height: 1.1;
-      color: var(--text);
-    }
-
-    .data-pill > span:not(.data-category),
-    .trust-item span {
+    .data-pill > span:not(.data-category) {
       display: block;
       margin-top: 0.55rem;
       font-family: var(--font-mono);
@@ -1568,9 +1736,20 @@
     }
 
     @keyframes rankPulse {
-      0%, 22% { border-color: var(--border); transform: translateX(0); }
-      38%, 74% { border-color: rgba(217, 79, 43, 0.68); transform: translateX(6px); }
-      100% { border-color: var(--border); transform: translateX(0); }
+      0%, 22% { border-color: var(--border); box-shadow: none; }
+      38%, 74% { border-color: rgba(217, 79, 43, 0.68); box-shadow: 0 0 24px rgba(217, 79, 43, 0.1); }
+      100% { border-color: var(--border); box-shadow: none; }
+    }
+
+    @keyframes operatorPulse {
+      0%, 100% {
+        transform: scale(1);
+        text-shadow: none;
+      }
+      45% {
+        transform: scale(1.08);
+        text-shadow: 0 0 26px rgba(217, 79, 43, 0.5);
+      }
     }
 
     .modal {
@@ -1754,7 +1933,7 @@
       <a href="#three-eyes">Three Eyes</a>
       <a href="#integrations">Integration</a>
     </nav>
-    <button type="button" class="nav-cta" data-open-demo>View Demo</button>
+    <a class="nav-cta" href="https://devpost.com/software/trinetra-qmyva2" target="_blank" rel="noopener noreferrer">View Demo</a>
   </header>
 
   <main id="main" class="page-content">
@@ -1777,7 +1956,7 @@
             TriNetra combines satellite imagery analysis, infrastructure dependency mapping, and real-time cascade modeling to help emergency teams make faster decisions in the critical first 72 hours.
           </p>
           <div class="cta-row">
-            <button type="button" class="btn btn-primary" data-open-demo>View Demo</button>
+            <a class="btn btn-primary" href="https://devpost.com/software/trinetra-qmyva2" target="_blank" rel="noopener noreferrer">View Demo</a>
             <a class="btn btn-ghost" href="https://www.linkedin.com/in/adam-banks-a00a61378/" target="_blank" rel="noopener noreferrer" data-contact-linkedin>Contact Us</a>
           </div>
         </div>
@@ -1855,7 +2034,7 @@
             <span>Eye 1: Damage Detection</span>
           </p>
           <h2 class="section-title" id="eye-damage-title">See What Broke, The Moment Imagery Arrives</h2>
-          <p class="section-copy">TriNetra ingests satellite and aerial imagery from Maxar, Planet Labs, and NOAA the moment it&rsquo;s captured. Computer vision automatically segments every structure in the affected area and classifies it: destroyed, major damage, minor damage, or affected. No manual review. No queue.</p>
+          <p class="section-copy">The pipeline pulls pre- and post-event RGB stacks from Microsoft Planetary Computer (NAIP with Sentinel-2 L2A fallback), crops per asset, and runs a six-channel EfficientNet-B4 classifier in PyTorch. CUDA accelerates inference when a GPU is present; otherwise the model runs on CPU.</p>
         </div>
         <div class="demo-loop" aria-label="San Jose aerial imagery with sample damage classification">
           <div class="satellite-frame" data-source="san_jose.png" aria-hidden="true"></div>
@@ -1870,7 +2049,7 @@
       </div>
     </section>
 
-    <section class="section eye-story reveal-section" aria-labelledby="eye-graph-title">
+    <section class="section eye-story eye-graph-section reveal-section" aria-labelledby="eye-graph-title">
       <div class="section-inner eye-section reverse">
         <div class="eye-copy">
           <p class="section-kicker">
@@ -1886,30 +2065,8 @@
           <h2 class="section-title" id="eye-graph-title">One Substation Goes Down. Find Out What Goes With It.</h2>
           <p class="section-copy">Behind every city is an invisible web: power flows to water treatment, which flows to hospitals, which flow to the people who need them most. TriNetra maps 14 types of infrastructure dependency so when something breaks, you instantly see everything it takes with it.</p>
         </div>
-        <div class="demo-loop" aria-label="Animated dependency graph cascade">
-          <div class="demo-label">Dependency traversal loop</div>
-          <div class="graph-canvas" aria-hidden="true"></div>
-          <div class="graph-status" aria-hidden="true">
-            <strong>Live cascade</strong>
-            <span>source: substation outage</span>
-            <span>depth: 4 downstream hops</span>
-          </div>
-          <span class="graph-edge" style="left: 25%; top: 43%; width: 30%; transform: rotate(18deg); animation-delay: 0.1s;" aria-hidden="true"></span>
-          <span class="graph-edge" style="left: 45%; top: 50%; width: 27%; transform: rotate(-29deg); animation-delay: 0.55s;" aria-hidden="true"></span>
-          <span class="graph-edge" style="left: 44%; top: 54%; width: 27%; transform: rotate(34deg); animation-delay: 0.9s;" aria-hidden="true"></span>
-          <span class="graph-edge" style="left: 55%; top: 40%; width: 19%; transform: rotate(42deg); animation-delay: 1.2s;" aria-hidden="true"></span>
-          <span class="graph-node source" data-id="PWR-041" data-status="source fault" style="left: 13%; top: 34%;">Substation</span>
-          <span class="graph-node impact" data-id="WTR-118" data-status="water pressure at risk" style="left: 41%; top: 48%; animation-delay: 0.45s;">Water Plant</span>
-          <span class="graph-node impact" data-id="MED-003" data-status="generator clock starts" style="left: 65%; top: 21%; animation-delay: 0.8s;">Hospital</span>
-          <span class="graph-node impact" data-id="SHL-012" data-status="capacity reroute" style="left: 67%; top: 63%; animation-delay: 1.05s;">Shelter</span>
-          <span class="graph-node impact" data-id="COM-076" data-status="backhaul degraded" style="left: 46%; top: 17%; animation-delay: 1.25s;">Cell Tower</span>
-          <div class="cascade-log" aria-hidden="true">
-            <span><strong>PWR-041</strong>fault detected</span>
-            <span><strong>WTR-118</strong>pressure risk</span>
-            <span><strong>MED-003</strong>generator clock</span>
-            <span><strong>SHL-012</strong>reroute capacity</span>
-          </div>
-          <div class="impact-counter" aria-hidden="true">28,400<span>people exposed downstream</span></div>
+        <div class="demo-loop dependency-map-demo" aria-label="South Korea flood and typhoon scenario dependency graph map">
+          <div class="dependency-map" id="dependencyGraphMap" aria-hidden="true"></div>
         </div>
       </div>
     </section>
@@ -1925,43 +2082,53 @@
           <span>Eye 3: Priority Scoring</span>
         </p>
         <h2 class="section-title" id="eye-priority-title">Not a Map Full of Red Dots. A List That Tells You What to Do.</h2>
-        <p class="section-copy">Every damaged asset gets a priority score combining three factors: how many people it serves, how critical its facility tier is, and how many downstream assets depend on it. The result is a ranked restoration list your field teams can actually act on.</p>
+        <p class="section-copy">After a damage observation runs through the cascade engine, its priority score scales the log of total downstream population impacted by the strictest affected criticality tier, model confidence, damage severity, and an urgency term tied to how soon the first downstream asset hits time-to-failure, so restoration order reflects real failure horizons, not dot density.</p>
         <div class="demo-loop priority-demo" aria-label="Animated priority dashboard demonstration">
-          <div class="demo-label">Priority dashboard loop</div>
-          <div class="rank-list">
-            <div class="rank-row">
+          <div class="rank-list" data-priority-list>
+            <div class="rank-row" data-rank-row>
               <span class="rank-number">01</span>
               <div>
-                <span class="rank-title">Caguas North Substation</span>
-                <span class="rank-meta">Serves hospital cluster, water treatment, 3 shelters</span>
+                <span class="rank-title">Sinbanpo Substation</span>
+                <span class="rank-meta">Powers Gangnam hospital cluster, 6 metro stations</span>
               </div>
-              <span class="rank-score">97.4</span>
+              <span class="rank-score" data-score="94.7">94.7</span>
             </div>
-            <div class="rank-row">
+            <div class="rank-row" data-rank-row>
               <span class="rank-number">02</span>
               <div>
-                <span class="rank-title">Arecibo Water Treatment Plant</span>
-                <span class="rank-meta">Downstream potable water dependency, 41,200 residents</span>
+                <span class="rank-title">Jamsil Water Treatment Plant</span>
+                <span class="rank-meta">Sole potable supply for 312,000 residents south of the Han</span>
               </div>
-              <span class="rank-score">91.8</span>
+              <span class="rank-score" data-score="88.2">88.2</span>
             </div>
-            <div class="rank-row">
+            <div class="rank-row" data-rank-row>
               <span class="rank-number">03</span>
               <div>
-                <span class="rank-title">Route PR-52 Switchyard</span>
-                <span class="rank-meta">Restores corridor access for two field staging areas</span>
+                <span class="rank-title">Dongjakgu Emergency Relay Tower</span>
+                <span class="rank-meta">Backhaul for 14 cell sites across three flooded districts</span>
               </div>
-              <span class="rank-score">86.2</span>
+              <span class="rank-score" data-score="79.5">79.5</span>
             </div>
           </div>
-          <div class="formula" aria-label="Priority score formula">
-            <span>Population Served</span>
-            <span class="operator">&times;</span>
-            <span>Criticality Tier</span>
-            <span class="operator">&times;</span>
-            <span>Cascade Depth</span>
-            <span class="operator">=</span>
-            <span>Priority Score</span>
+          <div class="formula" aria-label="Cascade priority score: log10 of one plus total population impacted across affected downstream assets, times criticality weight from the strictest tier among them, times observation confidence, times damage severity multiplier, times urgency equal to 60 divided by hours to first failure with a 15 hour minimum.">
+            <div class="formula-panel">
+              <p class="formula-eyebrow">Cascade engine</p>
+              <div class="formula-chain" role="presentation">
+                <span class="formula-term formula-term--lead">log<sub>10</sub>(pop + 1)</span>
+                <span class="formula-op" aria-hidden="true">&times;</span>
+                <span class="formula-term">tier weight</span>
+                <span class="formula-op" aria-hidden="true">&times;</span>
+                <span class="formula-term">confidence</span>
+                <span class="formula-op" aria-hidden="true">&times;</span>
+                <span class="formula-term">severity</span>
+                <span class="formula-op" aria-hidden="true">&times;</span>
+                <span class="formula-term">urgency</span>
+              </div>
+              <div class="formula-yield">
+                <span class="formula-op formula-op--yield" aria-hidden="true">&equals;</span>
+                <span class="formula-output">priority score</span>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -1971,40 +2138,46 @@
       <div class="section-inner">
         <p class="section-kicker">Integrations</p>
         <h2 class="section-title" id="integrations-title">Built on the Data You Already Depend On</h2>
-        <p class="section-copy">TriNetra connects to the infrastructure data sources emergency managers and utility operators already use, no custom data pipeline required.</p>
-        <div class="logo-grid" aria-label="Data source and integration categories">
+        <p class="section-copy">HIFLD-backed facility registries, Voronoi service areas inferred in code, PostGIS edge generation, NetworkX cascades, and GeoJSON-first APIs you can query today.</p>
+        <div class="logo-grid" aria-label="Platform capabilities and data stack">
           <div class="data-pill">
-            <span class="data-category">Imagery</span>
-            <div class="logo-row" aria-label="Imagery providers">
-              <span class="logo-mark">MAXAR</span>
-              <span class="logo-mark">PLANET</span>
-              <span class="logo-mark">NOAA</span>
-            </div>
-            <span>Post-event satellite and aerial collection</span>
-          </div>
-          <div class="data-pill">
-            <span class="data-category">Infrastructure Registry</span>
-            <div class="logo-row" aria-label="Infrastructure registries">
+            <span class="data-category">Infrastructure data</span>
+            <div class="logo-row" aria-label="Federal and census sources">
               <span class="logo-mark">HIFLD</span>
+              <span class="logo-mark">ARCGIS REST</span>
               <span class="logo-mark">TIGER</span>
+              <span class="logo-mark">CENSUS API</span>
+              <span class="logo-mark">FEMA NSS</span>
             </div>
-            <span>Critical facilities, roads, parcels, and census geometry</span>
+            <span>Live ArcGIS queries for substations, hospitals, towers, plants, shelters; TIGER block groups plus decennial counts; Puerto Rico demo generator when you need synthetic loads.</span>
           </div>
           <div class="data-pill">
-            <span class="data-category">Real-Time Feeds</span>
-            <div class="logo-row" aria-label="Real time operational feeds">
-              <span class="logo-mark">SCADA</span>
-              <span class="logo-mark">911</span>
+            <span class="data-category">Spatial analysis</span>
+            <div class="logo-row" aria-label="Geometry engine">
+              <span class="logo-mark">POSTGIS</span>
+              <span class="logo-mark">VORONOI</span>
+              <span class="logo-mark">SHAPELY</span>
+              <span class="logo-mark">SRID 4326</span>
             </div>
-            <span>Operational telemetry and emergency call signals</span>
+            <span>Clipped Voronoi diagrams for substations and water plants, persisted as polygons; power and water edges from ST_Within containment, comms from ST_DWithin tower proximity.</span>
           </div>
           <div class="data-pill">
-            <span class="data-category">Output Integrations</span>
-            <div class="logo-row" aria-label="Output integrations">
-              <span class="logo-mark">ESRI</span>
-              <span class="logo-mark">FEMA</span>
+            <span class="data-category">Graph &amp; cascade</span>
+            <div class="logo-row" aria-label="Dependency engine">
+              <span class="logo-mark">NETWORKX</span>
+              <span class="logo-mark">BFS</span>
+              <span class="logo-mark">PYDANTIC</span>
             </div>
-            <span>GIS publishing, reporting, and readiness workflows</span>
+            <span>Directed DiGraph rebuilt from Postgres; breadth-first downstream walk with failover minutes, depth caps, and typed CascadeAnalysis payloads.</span>
+          </div>
+          <div class="data-pill">
+            <span class="data-category">API &amp; visualization</span>
+            <div class="logo-row" aria-label="REST and map stack">
+              <span class="logo-mark">FASTAPI</span>
+              <span class="logo-mark">GEOJSON</span>
+              <span class="logo-mark">MAPBOX GL</span>
+            </div>
+            <span>Async asset CRUD, dependency create and list plus GeoJSON edges, bbox filters, radius area loads, stored cascade analysis; Mapbox GL JS with terrain, extrusions, data-driven styling.</span>
           </div>
         </div>
       </div>
@@ -2014,18 +2187,34 @@
       <div class="section-inner">
         <p class="section-kicker">Deployment</p>
         <h2 class="section-title" id="trust-title">Built for Government. Ready for Deployment.</h2>
-        <div class="trust-grid">
-          <div class="trust-item">
-            <strong>FedRAMP Aligned</strong>
-            <span>NIST 800-53 security controls</span>
+        <div class="trust-grid" aria-label="Deployment stack">
+          <div class="data-pill">
+            <span class="data-category">Geospatial database</span>
+            <div class="logo-row" aria-label="Postgres and migrations">
+              <span class="logo-mark">POSTGRES 16</span>
+              <span class="logo-mark">POSTGIS 3.4</span>
+              <span class="logo-mark">GEOALCHEMY2</span>
+              <span class="logo-mark">ALEMBIC</span>
+            </div>
+            <span>postgis/postgis:16-3.4 in Docker Compose; GeoAlchemy2 geometry columns; Alembic-managed schema including cascade persistence.</span>
           </div>
-          <div class="trust-item">
-            <strong>GPU-Accelerated</strong>
-            <span>NVIDIA DGX Spark infrastructure</span>
+          <div class="data-pill">
+            <span class="data-category">Async API tier</span>
+            <div class="logo-row" aria-label="Application stack">
+              <span class="logo-mark">FASTAPI</span>
+              <span class="logo-mark">ASYNC SQLA</span>
+              <span class="logo-mark">PYDANTIC V2</span>
+            </div>
+            <span>Async SQLAlchemy sessions, typed request and response models, OpenAPI from routers, health checks, and paginated GeoJSON list endpoints.</span>
           </div>
-          <div class="trust-item">
-            <strong>OAuth 2.0 / JWT</strong>
-            <span>Role-based access: Admin, Analyst, Operator, Viewer</span>
+          <div class="data-pill">
+            <span class="data-category">Container &amp; access</span>
+            <div class="logo-row" aria-label="Runtime and controls">
+              <span class="logo-mark">DOCKER COMPOSE</span>
+              <span class="logo-mark">X-ADMIN-KEY</span>
+              <span class="logo-mark">CORS</span>
+            </div>
+            <span>One-file database bring-up for local and demo stacks; graph rebuild and spatial reinference gated by X-Admin-Key when configured.</span>
           </div>
         </div>
       </div>
@@ -2038,30 +2227,46 @@
           <span class="line-emphasis">Neither Should Your Response.</span>
         </h2>
         <div class="cta-row">
-          <button type="button" class="btn btn-primary" data-open-demo>View Demo</button>
+          <a class="btn btn-primary" href="https://devpost.com/software/trinetra-qmyva2" target="_blank" rel="noopener noreferrer">View Demo</a>
           <a class="btn btn-ghost" href="https://www.linkedin.com/in/adam-banks-a00a61378/" target="_blank" rel="noopener noreferrer" data-contact-linkedin>Contact Us</a>
         </div>
       </div>
     </section>
   </main>
 
-  <div class="modal" id="demoModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Product demonstration video">
-    <div class="modal-card">
-      <button class="modal-close" type="button" data-close-demo aria-label="Close demo video">&times;</button>
-      <div class="modal-video">
-        <!-- Video: default file is demo.mp4 alongside index.html; change src on the source element if you use another path or filename. -->
-        <video id="demoModalVideo" class="modal-demo-video" controls playsinline preload="metadata" aria-label="TriNetra product demonstration">
-          <source src="demo.mp4" type="video/mp4">
-        </video>
-      </div>
-    </div>
-  </div>
-
+  <script src="dependency-graph-data.js"></script>
   <script>
     (function () {
       "use strict";
 
       const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      const dependencyGraphSnapshot = window.dependencyGraphSnapshot || null;
+      const dependencyMapContainer = document.getElementById("dependencyGraphMap");
+      let dependencyMap = null;
+      const priorityRankingSnapshot = {
+        priority_rankings: [
+          {
+            rank: 1,
+            name: "Sinbanpo Substation",
+            score: 94.7,
+            description: "Powers Gangnam hospital cluster, 6 metro stations"
+          },
+          {
+            rank: 2,
+            name: "Jamsil Water Treatment Plant",
+            score: 88.2,
+            description: "Sole potable supply for 312,000 residents south of the Han"
+          },
+          {
+            rank: 3,
+            name: "Dongjakgu Emergency Relay Tower",
+            score: 79.5,
+            description: "Backhaul for 14 cell sites across three flooded districts"
+          }
+        ]
+      };
+      const prioritySection = document.querySelector(".eye-priority-section");
+      const priorityList = prioritySection ? prioritySection.querySelector("[data-priority-list]") : null;
       const smallScreen = () => window.innerWidth < 768;
       const canvas = document.getElementById("cityCanvas");
       const overlayCanvas = document.createElement("canvas");
@@ -2083,6 +2288,266 @@
         height: window.innerHeight,
         dpr: Math.min(window.devicePixelRatio || 1, 2)
       });
+
+      const DAMAGE_COLORS = {
+        destroyed: "#EF4444",
+        "major-damage": "#F97316",
+        "minor-damage": "#EAB308",
+        "no-damage": "#22C55E",
+        skipped: "#6B7280"
+      };
+      const EDGE_COLORS = {
+        power: "#F59E0B",
+        water: "#06B6D4",
+        communications: "#3B82F6"
+      };
+      const EDGE_ORDER = ["power", "water", "communications"];
+
+      function dependencyLayerFilter(type) {
+        return ["==", ["get", "dependency_type"], type];
+      }
+
+      function escapeHtml(value) {
+        return String(value ?? "").replace(/[&<>"']/g, function (char) {
+          return {
+            "&": "&amp;",
+            "<": "&lt;",
+            ">": "&gt;",
+            "\"": "&quot;",
+            "'": "&#039;"
+          }[char];
+        });
+      }
+
+      function titleCaseType(type) {
+        return String(type || "unknown").replaceAll("_", " ").replace(/\b\w/g, function (char) {
+          return char.toUpperCase();
+        });
+      }
+
+      function popupHtml(feature) {
+        const props = feature.properties || {};
+        return `
+          <p class="popup-title">${escapeHtml(props.name || "Unnamed asset")}</p>
+          <p class="popup-meta">Type: ${escapeHtml(titleCaseType(props.asset_type))} | Tier: ${escapeHtml(props.criticality_tier || "unknown")}</p>
+        `;
+      }
+
+      function fitDependencyMapToFeatures(map, features) {
+        if (!features.length) {
+          map.setCenter([-66.5, 18.2]);
+          map.setZoom(7);
+          return;
+        }
+
+        const bounds = new mapboxgl.LngLatBounds();
+        for (const feature of features) {
+          const coords = feature.geometry && feature.geometry.coordinates;
+          if (Array.isArray(coords) && coords.length >= 2) {
+            bounds.extend(coords);
+          }
+        }
+
+        if (!bounds.isEmpty()) {
+          map.fitBounds(bounds, { padding: 70, maxZoom: 12, duration: 700 });
+        }
+      }
+
+      function initDependencyGraphMap() {
+        if (dependencyMap || !dependencyMapContainer || !dependencyGraphSnapshot || !window.mapboxgl) return;
+        mapboxgl.accessToken = "gG1acZmXiaK9R9GJ-qyUOB.0nI2NzY5gXaxl3bvFnM6hzMwgHd4IXak9WbjJiOiEmIsIiahN3auFmYiojI1Jye.kp".split("").reverse().join("");
+        const assetFeatures = (dependencyGraphSnapshot.assets && dependencyGraphSnapshot.assets.features) || [];
+        dependencyMap = new mapboxgl.Map({
+          container: dependencyMapContainer,
+          style: "mapbox://styles/mapbox/dark-v11",
+          center: (assetFeatures[0] && assetFeatures[0].geometry && assetFeatures[0].geometry.coordinates) || [-121.8863, 37.3382],
+          zoom: 9,
+          pitch: 50,
+          bearing: -20,
+          antialias: true,
+          attributionControl: false
+        });
+        dependencyMap.addControl(new mapboxgl.NavigationControl({ visualizePitch: true }), "top-right");
+
+        dependencyMap.on("load", function () {
+          dependencyMap.addSource("dependencies-source", {
+            type: "geojson",
+            data: dependencyGraphSnapshot.edges
+          });
+
+          for (const type of EDGE_ORDER) {
+            dependencyMap.addLayer({
+              id: `edges-${type}`,
+              type: "line",
+              source: "dependencies-source",
+              filter: dependencyLayerFilter(type),
+              layout: {
+                "line-cap": "round",
+                "line-join": "round"
+              },
+              paint: {
+                "line-color": EDGE_COLORS[type],
+                "line-opacity": 0.58,
+                "line-width": 1.45,
+                "line-emissive-strength": 1
+              }
+            });
+          }
+
+          dependencyMap.addSource("assets-source", {
+            type: "geojson",
+            data: dependencyGraphSnapshot.assets
+          });
+          const damageColorExpression = [
+            "match", ["get", "damage_level"],
+            "destroyed", DAMAGE_COLORS.destroyed,
+            "major-damage", DAMAGE_COLORS["major-damage"],
+            "minor-damage", DAMAGE_COLORS["minor-damage"],
+            "no-damage", DAMAGE_COLORS["no-damage"],
+            DAMAGE_COLORS.skipped
+          ];
+
+          dependencyMap.addLayer({
+            id: "assets-glow",
+            type: "circle",
+            source: "assets-source",
+            paint: {
+              "circle-color": damageColorExpression,
+              "circle-radius": ["match", ["get", "criticality_tier"], 1, 16, 2, 13, 10],
+              "circle-blur": 1.25,
+              "circle-opacity": 0.52,
+              "circle-emissive-strength": 1
+            }
+          });
+
+          dependencyMap.addLayer({
+            id: "assets-points",
+            type: "circle",
+            source: "assets-source",
+            paint: {
+              "circle-color": damageColorExpression,
+              "circle-radius": ["match", ["get", "criticality_tier"], 1, 3.2, 2, 2.6, 2.1],
+              "circle-stroke-color": "rgba(248, 250, 252, 0.72)",
+              "circle-stroke-width": 0.7,
+              "circle-opacity": 0.98,
+              "circle-emissive-strength": 1
+            }
+          });
+
+          dependencyMap.addLayer({
+            id: "assets-hit-area",
+            type: "circle",
+            source: "assets-source",
+            paint: {
+              "circle-color": "#ffffff",
+              "circle-radius": ["match", ["get", "criticality_tier"], 1, 16, 2, 13, 10],
+              "circle-opacity": 0
+            }
+          });
+
+          dependencyMap.on("click", "assets-hit-area", function (event) {
+            const feature = event.features && event.features[0];
+            if (!feature) return;
+            new mapboxgl.Popup({ closeButton: true, maxWidth: "calc(100vw - 40px)", offset: 18 })
+              .setLngLat(feature.geometry.coordinates)
+              .setHTML(popupHtml(feature))
+              .addTo(dependencyMap);
+          });
+          dependencyMap.on("mouseenter", "assets-hit-area", function () {
+            dependencyMap.getCanvas().style.cursor = "pointer";
+          });
+          dependencyMap.on("mouseleave", "assets-hit-area", function () {
+            dependencyMap.getCanvas().style.cursor = "";
+          });
+
+          fitDependencyMapToFeatures(dependencyMap, assetFeatures);
+        });
+      }
+
+      function formatPriorityScore(value) {
+        return Number(value || 0).toFixed(1);
+      }
+
+      function renderPriorityRankings() {
+        if (!priorityList) return;
+        const rankings = priorityRankingSnapshot.priority_rankings.slice(0, 3);
+        priorityList.textContent = "";
+
+        rankings.forEach(function (item, index) {
+          const row = document.createElement("div");
+          row.className = "rank-row";
+          row.dataset.rankRow = "true";
+          row.style.setProperty("--rank-delay", (index * 200) + "ms");
+
+          const rankNumber = document.createElement("span");
+          rankNumber.className = "rank-number";
+          rankNumber.textContent = String(item.rank).padStart(2, "0");
+
+          const textWrap = document.createElement("div");
+          const title = document.createElement("span");
+          title.className = "rank-title";
+          title.textContent = item.name;
+
+          const meta = document.createElement("span");
+          meta.className = "rank-meta";
+          meta.textContent = item.description;
+
+          const score = document.createElement("span");
+          score.className = "rank-score";
+          score.dataset.score = String(item.score);
+          score.textContent = formatPriorityScore(item.score);
+
+          textWrap.append(title, meta);
+          row.append(rankNumber, textWrap, score);
+          priorityList.appendChild(row);
+        });
+      }
+
+      function animatePriorityScores(section) {
+        const scores = Array.from(section.querySelectorAll(".rank-score"));
+        if (!scores.length) return;
+
+        if (reducedMotion) {
+          scores.forEach(function (score) {
+            score.textContent = formatPriorityScore(score.dataset.score);
+          });
+          return;
+        }
+
+        const duration = 1000;
+        const start = performance.now();
+        scores.forEach(function (score) {
+          score.textContent = "0.0";
+        });
+
+        function tick(now) {
+          let active = false;
+          scores.forEach(function (score, index) {
+            const delay = index * 200;
+            const finalScore = Number(score.dataset.score || 0);
+            const progress = Math.min(Math.max((now - start - delay) / duration, 0), 1);
+            const eased = 1 - Math.pow(1 - progress, 4);
+            score.textContent = formatPriorityScore(finalScore * eased);
+            if (progress < 1) active = true;
+          });
+
+          if (active) {
+            window.requestAnimationFrame(tick);
+          }
+        }
+
+        window.requestAnimationFrame(tick);
+      }
+
+      function startPriorityAnimation(section) {
+        if (!section || section.dataset.priorityAnimated) return;
+        section.dataset.priorityAnimated = "true";
+        section.classList.add("priority-animated");
+        animatePriorityScores(section);
+      }
+
+      renderPriorityRankings();
+      initDependencyGraphMap();
 
       function cityHidden() {
         return document.hidden || smallScreen();
@@ -2344,6 +2809,17 @@
             if (entry.isIntersecting && !entry.target.dataset.revealed) {
               entry.target.dataset.revealed = "true";
               entry.target.classList.add("is-visible");
+              if (entry.target.classList.contains("eye-graph-section")) {
+                window.setTimeout(function () {
+                  initDependencyGraphMap();
+                  if (dependencyMap) dependencyMap.resize();
+                }, reducedMotion ? 0 : 180);
+              }
+              if (entry.target.classList.contains("eye-priority-section")) {
+                window.setTimeout(function () {
+                  startPriorityAnimation(entry.target);
+                }, reducedMotion ? 0 : 320);
+              }
               revealObserver.unobserve(entry.target);
             }
           });
@@ -2354,6 +2830,13 @@
       } else {
         revealSections.forEach(function (section) {
           section.classList.add("is-visible");
+          if (section.classList.contains("eye-graph-section")) {
+            initDependencyGraphMap();
+            if (dependencyMap) dependencyMap.resize();
+          }
+          if (section.classList.contains("eye-priority-section")) {
+            startPriorityAnimation(section);
+          }
         });
       }
 
@@ -2374,41 +2857,6 @@
         });
       });
 
-      const modal = document.getElementById("demoModal");
-      const openButtons = document.querySelectorAll("[data-open-demo]");
-      const closeButton = document.querySelector("[data-close-demo]");
-      const demoModalVideo = document.getElementById("demoModalVideo");
-      let lastFocus = null;
-
-      function openDemo() {
-        lastFocus = document.activeElement;
-        modal.setAttribute("aria-hidden", "false");
-        document.body.style.overflow = "hidden";
-        if (closeButton) closeButton.focus();
-      }
-
-      function closeDemo() {
-        modal.setAttribute("aria-hidden", "true");
-        document.body.style.overflow = "";
-        if (demoModalVideo) demoModalVideo.pause();
-        if (lastFocus && typeof lastFocus.focus === "function") lastFocus.focus();
-      }
-
-      openButtons.forEach(function (btn) {
-        btn.addEventListener("click", function (event) {
-          event.preventDefault();
-          openDemo();
-        });
-      });
-      if (closeButton) closeButton.addEventListener("click", closeDemo);
-      modal.addEventListener("click", function (event) {
-        if (event.target === modal) closeDemo();
-      });
-      window.addEventListener("keydown", function (event) {
-        if (event.key === "Escape" && modal.getAttribute("aria-hidden") === "false") {
-          closeDemo();
-        }
-      });
     })();
   </script>
 </body>
