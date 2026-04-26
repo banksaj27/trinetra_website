@@ -1030,6 +1030,11 @@
       background: rgba(234, 179, 8, 0.18);
     }
 
+    .damage-cell.no-damage {
+      color: #22c55e;
+      background: rgba(34, 197, 94, 0.16);
+    }
+
     .damage-cell::after {
       content: attr(data-severity);
       position: absolute;
@@ -1043,9 +1048,46 @@
       white-space: nowrap;
     }
 
-    .demo-loop:has(.satellite-frame) .damage-cell {
+    .demo-loop:has(.satellite-frame) .damage-cell:nth-child(2) {
       left: 46%;
-      top: 40%;
+      top: 38%;
+      animation-delay: 0s;
+    }
+
+    .demo-loop:has(.satellite-frame) .damage-cell:nth-child(3) {
+      left: 22%;
+      top: 30%;
+      animation-delay: 0.12s;
+    }
+
+    .demo-loop:has(.satellite-frame) .damage-cell:nth-child(4) {
+      left: 34%;
+      top: 46%;
+      animation-delay: 0.28s;
+    }
+
+    .demo-loop:has(.satellite-frame) .damage-cell:nth-child(5) {
+      left: 58%;
+      top: 34%;
+      animation-delay: 0.44s;
+    }
+
+    .demo-loop:has(.satellite-frame) .damage-cell:nth-child(6) {
+      left: 70%;
+      top: 48%;
+      animation-delay: 0.6s;
+    }
+
+    .demo-loop:has(.satellite-frame) .damage-cell:nth-child(7) {
+      left: 40%;
+      top: 58%;
+      animation-delay: 0.76s;
+    }
+
+    .demo-loop:has(.satellite-frame) .damage-cell:nth-child(8) {
+      left: 54%;
+      top: 62%;
+      animation-delay: 0.92s;
     }
 
     .graph-canvas {
@@ -1816,6 +1858,12 @@
         <div class="demo-loop" aria-label="San Jose aerial imagery with sample damage classification">
           <div class="satellite-frame" data-source="san_jose.png" aria-hidden="true"></div>
           <span class="damage-cell minor-damage" data-severity="minor-damage" aria-hidden="true"></span>
+          <span class="damage-cell no-damage" data-severity="no-damage" aria-hidden="true"></span>
+          <span class="damage-cell no-damage" data-severity="no-damage" aria-hidden="true"></span>
+          <span class="damage-cell no-damage" data-severity="no-damage" aria-hidden="true"></span>
+          <span class="damage-cell no-damage" data-severity="no-damage" aria-hidden="true"></span>
+          <span class="damage-cell no-damage" data-severity="no-damage" aria-hidden="true"></span>
+          <span class="damage-cell no-damage" data-severity="no-damage" aria-hidden="true"></span>
         </div>
       </div>
     </section>
