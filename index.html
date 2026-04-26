@@ -1598,17 +1598,10 @@
     .modal-head {
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      justify-content: flex-end;
       gap: 1rem;
       padding: 1rem 1.25rem;
       border-bottom: 1px solid var(--rule);
-    }
-
-    .modal-head h2 {
-      font-family: var(--font-display);
-      font-size: clamp(1.4rem, 3vw, 2.2rem);
-      letter-spacing: -0.02em;
-      text-transform: none;
     }
 
     .modal-close {
@@ -1646,13 +1639,6 @@
       object-fit: contain;
       display: block;
       background: #0a0a0a;
-    }
-
-    .modal-body {
-      padding: 1rem 1.25rem 1.25rem;
-      color: var(--muted);
-      font-family: var(--font-mono);
-      font-size: 0.82rem;
     }
 
     @keyframes riseIn {
@@ -2061,20 +2047,16 @@
     </section>
   </main>
 
-  <div class="modal" id="demoModal" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="modal-title">
+  <div class="modal" id="demoModal" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Product demonstration video">
     <div class="modal-card">
       <div class="modal-head">
-        <h2 id="modal-title">Live Response Intelligence Demo</h2>
         <button class="modal-close" type="button" data-close-demo aria-label="Close demo video">&times;</button>
       </div>
       <div class="modal-video">
         <!-- Video: default file is demo.mp4 alongside index.html; change src on the source element if you use another path or filename. -->
-        <video id="demoModalVideo" class="modal-demo-video" controls playsinline preload="metadata" aria-label="TriNetra product demonstration" aria-describedby="demo-video-desc">
+        <video id="demoModalVideo" class="modal-demo-video" controls playsinline preload="metadata" aria-label="TriNetra product demonstration">
           <source src="demo.mp4" type="video/mp4">
         </video>
-      </div>
-      <div class="modal-body" id="demo-video-desc">
-        About one minute of walkthrough: damage classification from imagery, dependency cascade, and ranked restoration priorities.
       </div>
     </div>
   </div>
