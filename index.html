@@ -805,7 +805,7 @@
 
     .three-eyes-heading p {
       max-width: 58ch;
-      margin: 1rem auto 0;
+      margin: 1rem auto clamp(1.1rem, 2vw, 1.8rem);
       font-family: var(--font-mono);
       color: var(--text-2);
     }
@@ -1183,6 +1183,7 @@
 
     .graph-node {
       position: absolute;
+      appearance: none;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -1198,6 +1199,7 @@
       color: var(--text);
       text-align: center;
       box-shadow: 0 14px 34px rgba(0, 0, 0, 0.34);
+      cursor: pointer;
       transition: border-color 220ms var(--ease-out), color 220ms var(--ease-out), transform 220ms var(--ease-out);
     }
 
@@ -1226,6 +1228,65 @@
 
     .graph-node.impact {
       animation: nodeImpact 4.8s var(--ease-out) infinite;
+    }
+
+    .graph-node.is-selected {
+      border-color: var(--accent);
+      color: var(--accent);
+      box-shadow: 0 16px 44px rgba(0, 0, 0, 0.38), 0 0 34px rgba(217, 79, 43, 0.32);
+    }
+
+    .node-detail {
+      position: absolute;
+      left: 0;
+      top: 0;
+      z-index: 5;
+      width: min(22rem, calc(100% - 1.5rem));
+      padding: 1rem 1.1rem;
+      border: 1px solid rgba(217, 79, 43, 0.38);
+      background: rgba(4, 4, 4, 0.96);
+      box-shadow: 0 18px 54px rgba(0, 0, 0, 0.58), 0 0 34px rgba(217, 79, 43, 0.16);
+      color: var(--text);
+      font-family: var(--font-mono);
+      transform: translate3d(var(--node-detail-x, 0px), var(--node-detail-y, 0px), 0);
+    }
+
+    .node-detail[hidden] {
+      display: none;
+    }
+
+    .node-detail-title {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 1.25rem;
+      font-weight: 700;
+      line-height: 1.05;
+      color: var(--text);
+    }
+
+    .node-detail-meta {
+      display: block;
+      margin-top: 0.65rem;
+      color: var(--muted);
+      font-size: 0.78rem;
+    }
+
+    .node-detail-status {
+      display: block;
+      margin-top: 1rem;
+      padding-top: 0.75rem;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      color: var(--accent);
+      font-size: 0.74rem;
+      font-weight: 500;
+    }
+
+    .node-detail-impact {
+      display: block;
+      margin-top: 0.45rem;
+      color: var(--text-2);
+      font-size: 0.72rem;
+      line-height: 1.45;
     }
 
     .cascade-log {
@@ -1576,7 +1637,7 @@
     .modal {
       position: fixed;
       inset: 0;
-      z-index: 100;
+      z-index: 2000;
       display: none;
       place-items: center;
       padding: var(--gutter);
@@ -1648,6 +1709,17 @@
       color: var(--text);
       font-size: 1.5rem;
       box-shadow: 0 0 40px var(--accent-glow);
+    }
+
+    .video-placeholder {
+      display: grid;
+      justify-items: center;
+      gap: 1rem;
+      color: var(--muted);
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      letter-spacing: 0.04em;
+      text-align: center;
     }
 
     .modal-body {
@@ -1772,7 +1844,7 @@
       <a href="#three-eyes">Three Eyes</a>
       <a href="#integrations">Integration</a>
     </nav>
-    <a class="nav-cta" href="demo.html">View Demo</a>
+    <a class="nav-cta" href="#demoModal" aria-controls="demoModal" aria-haspopup="dialog" data-open-demo>View Demo</a>
   </header>
 
   <main id="main" class="page-content">
@@ -1795,7 +1867,7 @@
             TriNetra combines satellite imagery analysis, infrastructure dependency mapping, and real-time cascade modeling to help emergency teams make faster decisions in the critical first 72 hours.
           </p>
           <div class="cta-row">
-            <a class="btn btn-primary" href="demo.html">View Demo</a>
+            <a class="btn btn-primary" href="#demoModal" aria-controls="demoModal" aria-haspopup="dialog" data-open-demo>View Demo</a>
             <a class="btn btn-ghost" href="https://www.linkedin.com/in/adam-banks-a00a61378/" target="_blank" rel="noopener noreferrer" data-contact-linkedin>Contact Us</a>
           </div>
         </div>
@@ -1916,11 +1988,11 @@
           <span class="graph-edge" style="left: 45%; top: 50%; width: 27%; transform: rotate(-29deg); animation-delay: 0.55s;" aria-hidden="true"></span>
           <span class="graph-edge" style="left: 44%; top: 54%; width: 27%; transform: rotate(34deg); animation-delay: 0.9s;" aria-hidden="true"></span>
           <span class="graph-edge" style="left: 55%; top: 40%; width: 19%; transform: rotate(42deg); animation-delay: 1.2s;" aria-hidden="true"></span>
-          <span class="graph-node source" data-id="PWR-041" data-status="source fault" style="left: 13%; top: 34%;">Substation</span>
-          <span class="graph-node impact" data-id="WTR-118" data-status="water pressure at risk" style="left: 41%; top: 48%; animation-delay: 0.45s;">Water Plant</span>
-          <span class="graph-node impact" data-id="MED-003" data-status="generator clock starts" style="left: 65%; top: 21%; animation-delay: 0.8s;">Hospital</span>
-          <span class="graph-node impact" data-id="SHL-012" data-status="capacity reroute" style="left: 67%; top: 63%; animation-delay: 1.05s;">Shelter</span>
-          <span class="graph-node impact" data-id="COM-076" data-status="backhaul degraded" style="left: 46%; top: 17%; animation-delay: 1.25s;">Cell Tower</span>
+          <button class="graph-node source" type="button" data-id="PWR-041" data-status="source fault" data-node-meta="Type: Power | Tier: 1" data-node-impact="Primary fault source. Restoring this asset reduces downstream exposure across water, medical, shelter, and communications dependencies." style="left: 13%; top: 34%;">Substation</button>
+          <button class="graph-node impact" type="button" data-id="WTR-118" data-status="water pressure at risk" data-node-meta="Type: Water | Tier: 1" data-node-impact="Pressure loss risk for dependent service zones and facilities without independent pumping capacity." style="left: 41%; top: 48%; animation-delay: 0.45s;">Water Plant</button>
+          <button class="graph-node impact" type="button" data-id="MED-003" data-status="generator clock starts" data-node-meta="Type: Medical | Tier: 1" data-node-impact="Backup power countdown started. Patient capacity and emergency intake depend on restoration timing." style="left: 65%; top: 21%; animation-delay: 0.8s;">Hospital</button>
+          <button class="graph-node impact" type="button" data-id="SHL-012" data-status="capacity reroute" data-node-meta="Type: Shelter | Tier: 2" data-node-impact="Shelter load may need rerouting if upstream power and water dependencies remain degraded." style="left: 67%; top: 63%; animation-delay: 1.05s;">Shelter</button>
+          <button class="graph-node impact" type="button" data-id="COM-076" data-status="backhaul degraded" data-node-meta="Type: Communications | Tier: 2" data-node-impact="Backhaul degradation limits responder coordination and public safety message delivery." style="left: 46%; top: 17%; animation-delay: 1.25s;">Cell Tower</button>
           <div class="cascade-log" aria-hidden="true">
             <span><strong>PWR-041</strong>fault detected</span>
             <span><strong>WTR-118</strong>pressure risk</span>
@@ -2056,7 +2128,7 @@
           <span class="line-emphasis">Neither Should Your Response.</span>
         </h2>
         <div class="cta-row">
-          <a class="btn btn-primary" href="demo.html">View Demo</a>
+          <a class="btn btn-primary" href="#demoModal" aria-controls="demoModal" aria-haspopup="dialog" data-open-demo>View Demo</a>
           <a class="btn btn-ghost" href="https://www.linkedin.com/in/adam-banks-a00a61378/" target="_blank" rel="noopener noreferrer" data-contact-linkedin>Contact Us</a>
         </div>
       </div>
@@ -2070,7 +2142,10 @@
         <button class="modal-close" type="button" data-close-demo aria-label="Close demo video">&times;</button>
       </div>
       <div class="modal-video" aria-label="Demo video placeholder">
-        <button class="play-button" type="button" aria-label="Play demo video">&#9658;</button>
+        <div class="video-placeholder">
+          <button class="play-button" type="button" aria-label="Demo video will be added later">&#9658;</button>
+          <span>MP4 walkthrough placeholder</span>
+        </div>
       </div>
       <div class="modal-body">
         Demo placeholder. Wire this to a 60-90 second product walkthrough showing imagery classification, dependency traversal, and priority scoring during a disaster response scenario.
@@ -2378,6 +2453,132 @@
         });
       }
 
+      const graphNodes = Array.from(document.querySelectorAll(".graph-node"));
+      let activeGraphNode = null;
+      let activeNodeDetail = null;
+
+      function clampNodeDetailValue(value, min, max) {
+        if (max < min) return min;
+        return Math.max(min, Math.min(max, value));
+      }
+
+      function ensureNodeDetail(loop) {
+        let detail = loop.querySelector(".node-detail");
+        if (detail) return detail;
+
+        detail = document.createElement("div");
+        detail.className = "node-detail";
+        detail.hidden = true;
+        detail.setAttribute("role", "status");
+        detail.setAttribute("aria-live", "polite");
+        detail.innerHTML = [
+          '<strong class="node-detail-title"></strong>',
+          '<span class="node-detail-meta"></span>',
+          '<span class="node-detail-status"></span>',
+          '<span class="node-detail-impact"></span>'
+        ].join("");
+        loop.appendChild(detail);
+        return detail;
+      }
+
+      function positionNodeDetail(detail, node) {
+        const loop = node.closest(".demo-loop");
+        if (!loop) return;
+
+        const margin = 12;
+        const gap = 14;
+        const loopRect = loop.getBoundingClientRect();
+        const nodeRect = node.getBoundingClientRect();
+        const detailRect = detail.getBoundingClientRect();
+
+        let x = nodeRect.left - loopRect.left + (nodeRect.width - detailRect.width) / 2;
+        let y = nodeRect.top - loopRect.top - detailRect.height - gap;
+
+        const viewportTop = Math.max(loopRect.top, 0) + margin;
+        if (nodeRect.top - detailRect.height - gap < viewportTop) {
+          y = nodeRect.bottom - loopRect.top + gap;
+        }
+
+        const minX = Math.max(margin, -loopRect.left + margin);
+        const maxX = Math.min(
+          loopRect.width - detailRect.width - margin,
+          window.innerWidth - loopRect.left - detailRect.width - margin
+        );
+        const minY = Math.max(margin, -loopRect.top + margin);
+        const maxY = Math.min(
+          loopRect.height - detailRect.height - margin,
+          window.innerHeight - loopRect.top - detailRect.height - margin
+        );
+
+        x = clampNodeDetailValue(x, minX, maxX);
+        y = clampNodeDetailValue(y, minY, maxY);
+
+        detail.style.setProperty("--node-detail-x", x + "px");
+        detail.style.setProperty("--node-detail-y", y + "px");
+      }
+
+      function openNodeDetail(node) {
+        const loop = node.closest(".demo-loop");
+        if (!loop) return;
+
+        const detail = ensureNodeDetail(loop);
+        const title = detail.querySelector(".node-detail-title");
+        const meta = detail.querySelector(".node-detail-meta");
+        const status = detail.querySelector(".node-detail-status");
+        const impact = detail.querySelector(".node-detail-impact");
+
+        graphNodes.forEach(function (item) {
+          item.classList.toggle("is-selected", item === node);
+          item.setAttribute("aria-expanded", item === node ? "true" : "false");
+        });
+
+        title.textContent = node.textContent.trim();
+        meta.textContent = node.dataset.nodeMeta || "";
+        status.textContent = (node.dataset.id || "Asset") + ": " + (node.dataset.status || "status pending");
+        impact.textContent = node.dataset.nodeImpact || "";
+
+        detail.hidden = false;
+        activeGraphNode = node;
+        activeNodeDetail = detail;
+        positionNodeDetail(detail, node);
+      }
+
+      function closeNodeDetail() {
+        if (activeNodeDetail) activeNodeDetail.hidden = true;
+        graphNodes.forEach(function (node) {
+          node.classList.remove("is-selected");
+          node.setAttribute("aria-expanded", "false");
+        });
+        activeGraphNode = null;
+        activeNodeDetail = null;
+      }
+
+      graphNodes.forEach(function (node) {
+        node.setAttribute("aria-expanded", "false");
+        node.addEventListener("click", function (event) {
+          event.stopPropagation();
+          openNodeDetail(node);
+        });
+      });
+
+      document.addEventListener("click", function (event) {
+        if (!activeNodeDetail) return;
+        if (event.target.closest(".node-detail") || event.target.closest(".graph-node")) return;
+        closeNodeDetail();
+      });
+
+      window.addEventListener("keydown", function (event) {
+        if (event.key === "Escape" && activeNodeDetail) closeNodeDetail();
+      });
+
+      window.addEventListener("resize", function () {
+        if (activeGraphNode && activeNodeDetail) positionNodeDetail(activeNodeDetail, activeGraphNode);
+      });
+
+      window.addEventListener("scroll", function () {
+        if (activeGraphNode && activeNodeDetail) positionNodeDetail(activeNodeDetail, activeGraphNode);
+      }, { passive: true });
+
       const contactLinks = Array.from(document.querySelectorAll("[data-contact-linkedin]"));
       const linkedInProfiles = [
         "https://www.linkedin.com/in/adam-banks-a00a61378/",
@@ -2400,7 +2601,8 @@
       const closeButton = document.querySelector("[data-close-demo]");
       let lastFocus = null;
 
-      function openDemo() {
+      function openDemo(event) {
+        if (event) event.preventDefault();
         lastFocus = document.activeElement;
         modal.setAttribute("aria-hidden", "false");
         document.body.style.overflow = "hidden";
