@@ -6,13 +6,13 @@ brand
 
 ## Users
 
-TriNetra AI serves emergency management directors, infrastructure operations leads, and GovTech procurement evaluators. They are evaluating the platform in high-stakes contexts where operational credibility matters more than novelty: FEMA regional offices, state emergency operations centers, utility grid operations teams, water authorities, telecom providers, and municipal governments.
+TriNetra serves emergency management directors, infrastructure operations leads, and GovTech procurement evaluators. They are evaluating the platform in high-stakes contexts where operational credibility matters more than novelty: FEMA regional offices, state emergency operations centers, utility grid operations teams, water authorities, telecom providers, and municipal governments.
 
 Emergency management leaders need to know whether the platform will help them make better decisions faster during the first 24-72 hours of a real disaster. Infrastructure operators need proof that TriNetra understands SCADA integration, asset registries, network topology, and dependency modeling. Procurement evaluators need compliance, architecture, and maturity signals strong enough to survive a government buying process.
 
 ## Product Purpose
 
-TriNetra AI is a disaster impact intelligence platform that shows what breaks next after damage occurs. It combines computer vision over satellite and aerial imagery, an infrastructure dependency graph, and real-time cascade analysis to identify downstream impacts, critical facilities at risk, population exposure, and ranked restoration priorities.
+TriNetra is a disaster impact intelligence platform that shows what breaks next after damage occurs. It combines computer vision over satellite and aerial imagery, an infrastructure dependency graph, and real-time cascade analysis to identify downstream impacts, critical facilities at risk, population exposure, and ranked restoration priorities.
 
 The landing page must make a high-trust B2G/B2B visitor feel within 10 seconds that the team understands the operational reality of disaster response. It should guide them toward a live demonstration, a real-disaster demo video, or a one-page solution brief depending on their role in the buying process.
 
