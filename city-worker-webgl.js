@@ -424,8 +424,8 @@
           var ax=_p0.x*(1-ta)*(1-ta)+_p1.x*2*(1-ta)*ta+_p2.x*ta*ta,ay=_p0.y*(1-ta)*(1-ta)+_p1.y*2*(1-ta)*ta+_p2.y*ta*ta;
           var bx2=_p0.x*(1-tb)*(1-tb)+_p1.x*2*(1-tb)*tb+_p2.x*tb*tb,by2=_p0.y*(1-tb)*(1-tb)+_p1.y*2*(1-tb)*tb+_p2.y*tb*tb;
           var dx=bx2-ax,dy=by2-ay,dl=Math.sqrt(dx*dx+dy*dy);if(dl>.001){var ox=dx/dl*.65,oy=dy/dl*.65;ax-=ox;ay-=oy;bx2+=ox;by2+=oy;}
-          o=pL(sceneBuf,o,ax,ay,bx2,by2,8,1,.36,.14,.12*alpha);
-          o=pL(sceneBuf,o,ax,ay,bx2,by2,4.2,1,.86,.58,.62*alpha);
+          o=pL(sceneBuf,o,ax,ay,bx2,by2,6,1,.36,.14,.09*alpha);
+          o=pL(sceneBuf,o,ax,ay,bx2,by2,3.2,1,.86,.58,.48*alpha);
           o=pL(sceneBuf,o,ax,ay,bx2,by2,.8,1,.933,.933,.95*alpha);}
         sceneN=o/S6;}
   
@@ -434,15 +434,15 @@
         if(cameraDepth(ax,ay,az)<NEAR_PLANE&&cameraDepth(mx,my,mz)<NEAR_PLANE&&cameraDepth(bx,by2,bz)<NEAR_PLANE)return;
         var al=1;if(el<280)al=el/280;if(arc.arrivedAt){var fe=now-arc.arrivedAt-arc.lifetime;if(fe>0)al*=Math.max(0,1-fe/500);}
         var o=sceneN*S6;
-        if(projectInto(ax,ay,az,arc.aP)){o=pRG(sceneBuf,o,arc.aP.x,arc.aP.y,17,1,.38,.16,.32*al);
-          o=pRG(sceneBuf,o,arc.aP.x,arc.aP.y,5,1,.72,.42,.6*al);}
+        if(projectInto(ax,ay,az,arc.aP)){o=pRG(sceneBuf,o,arc.aP.x,arc.aP.y,14,1,.38,.16,.26*al);
+          o=pRG(sceneBuf,o,arc.aP.x,arc.aP.y,4,1,.72,.42,.48*al);}
         var t=tT,om=1-t,px=om*om*ax+2*om*t*mx+t*t*bx,py=om*om*ay+2*om*t*my+t*t*by2,pz=om*om*az+2*om*t*mz+t*t*bz;
         if(projectInto(px,py,pz,arc.pP)&&t<1){o=pRG(sceneBuf,o,arc.pP.x,arc.pP.y,arc.dotRadius*3.6,1,.36,.14,.5*al);
           o=pRG(sceneBuf,o,arc.pP.x,arc.pP.y,arc.dotRadius*1.2,1,.86,.58,.88*al);
           o=pDot(sceneBuf,o,arc.pP.x,arc.pP.y,Math.max(1.6,arc.dotRadius*.32),1,.96,.9,.92*al);}
         if(arc.bloomAt&&projectInto(bx,by2,bz,arc.bP)){var bt=(now-arc.bloomAt)/680;if(bt<1){var bf=Math.pow(1-bt,1.7),ps=1+bt*1.45;
-          o=pRG(sceneBuf,o,arc.bP.x,arc.bP.y,18*ps,1,.34,.12,.4*bf*al);
-          o=pRG(sceneBuf,o,arc.bP.x,arc.bP.y,7*ps,1,.72,.4,.55*bf*al);
+          o=pRG(sceneBuf,o,arc.bP.x,arc.bP.y,14*ps,1,.34,.12,.3*bf*al);
+          o=pRG(sceneBuf,o,arc.bP.x,arc.bP.y,5.5*ps,1,.72,.4,.42*bf*al);
           }}
         sceneN=o/S6;}
   
